@@ -1,0 +1,15 @@
+<h1>Personajes</h1>
+<div class="character-list">
+
+    {% for c in characters %}
+        <div class="card">
+            <img src="https://cdn.thesimpsonsapi.com/200{{ c.image }}" alt="{{ c.name }}">
+            <h3>{{ c.name }}</h3>
+            <p>{{ c.description }}</p>
+        </div>
+
+    {% empty %}
+        <p>No se encontraron personajes.</p>
+    {% endfor %}
+
+</div>
