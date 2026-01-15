@@ -1,0 +1,53 @@
+.tier-row {
+    border: 2px solid #000;
+    margin-bottom: 5px;
+    min-height: 100px;
+    background: rgba(255, 255, 255, 0.1);
+}
+
+.tier-label {
+    width: 80px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 2rem;
+    font-weight: 900;
+    border-right: 2px solid #000;
+}
+
+.s-tier { background-color: #ff7f7f; }
+.a-tier { background-color: #ffbf7f; }
+.b-tier { background-color: #ffff7f; }
+
+.tier-content {
+    flex-grow: 1;
+    display: flex;
+    flex-wrap: wrap;
+    padding: 10px;
+    gap: 10px;
+}
+
+.tier-card {
+    width: 70px;
+    height: 70px;
+    cursor: grab;
+    background: white;
+    border: 2px solid #000;
+    overflow: hidden;
+    transition: transform 0.2s;
+}
+
+.tier-card img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+}
+
+.tier-card:active {
+    cursor: grabbing;
+}
+
+.ghost {
+    opacity: 0.5;
+    background: #FFD90F;
+}

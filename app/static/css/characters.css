@@ -1,0 +1,27 @@
+.card-character {
+    background-color: white !important;
+    border: 3px solid #FFD90F !important;
+    border-radius: 15px;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    overflow: hidden;
+}
+
+.card-character:hover {
+    transform: translateY(-10px);
+    box-shadow: 0 10px 20px rgba(0,0,0,0.3) !important;
+}
+
+.card-character img {
+    padding: 15px;
+    background-color: #fff;
+}
+
+.simpsons-title {
+    display: block;
+    margin: 0 auto;
+    width: 100%;
+    max-width: 500px;
+    height: auto;
+    padding-bottom: 20px;
+    filter: drop-shadow(2px 2px 5px rgba(0,0,0,0.5));
+}

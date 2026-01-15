@@ -1,0 +1,33 @@
+.login-container {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    padding: 20px;
+}
+
+.login-box {
+    background: rgba(255, 255, 255, 0.9);
+    padding: 40px;
+    border: 4px solid #000;
+    border-radius: 20px;
+    box-shadow: 10px 10px 0px rgba(0,0,0,0.2);
+    max-width: 400px;
+    width: 100%;
+}
+
+.form-inputs p input {
+    width: 100%;
+    padding: 10px;
+    border: 3px solid #000;
+    border-radius: 10px;
+    margin-top: 5px;
+    font-weight: bold;
+}
+
+.form-inputs p label {
+    font-weight: 900;
+    text-transform: uppercase;
+    font-size: 0.9rem;
+}

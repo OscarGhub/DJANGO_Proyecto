@@ -1,8 +1,9 @@
 from django.contrib.auth import logout, authenticate, login
+from django.db.models import Avg
 from django.shortcuts import render, redirect
 
 from .forms import LoginForm, RegistroForm
-from .models import Character
+from .models import Character, Review
 from .services import sync_simpsons_characters
 
 
@@ -50,3 +51,34 @@ def login_usuario(request):
 def logout_usuario(request):
     logout(request)
     return redirect('login')
+
+
+def ranking(request):
+    if not Character.objects.using('mongodb').exists():
+        sync_simpsons_characters()
+
+    characters = Character.objects.using('mongodb').all()
+    return render(request, 'ranking.html', {'characters': characters})
+
+
+def ver_rankings(request):
+    return render(request, 'ver_rankigs.html')
+
+
+def mejores_votados(request):
+    characters = Character.objects.using('mongodb').all()
+
+    ranking_final = []
+
+    for c in characters:
+        votos = Review.objects.using('mongodb').filter(comment__icontains=c.name)
+        promedio = votos.aggregate(Avg('rating'))['rating__avg'] or 0
+
+        ranking_final.append({
+            'character': c,
+            'puntuacion': round(promedio, 1),
+            'estrellas': range(int(promedio))
+        })
+
+    ranking_final = sorted(ranking_final, key=lambda x: x['puntuacion'], reverse=True)
+    return render(request, 'ver_rankigs.html', {'ranking': ranking_final})
