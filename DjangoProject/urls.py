@@ -28,4 +28,6 @@ urlpatterns = [
      path('logout/', views.logout_usuario, name='logout'),
     path('ranking/', views.ranking,name='ranking'),
     path('ver_rankings/', views.ver_rankings,name='ver_rankings'),
+    path('gestion/', views.gestion,name='gestion'),
+    path('categorias/', views.categorias,name='categorias')
 ]

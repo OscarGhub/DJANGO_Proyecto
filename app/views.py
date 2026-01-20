@@ -82,3 +82,9 @@ def mejores_votados(request):
 
     ranking_final = sorted(ranking_final, key=lambda x: x['puntuacion'], reverse=True)
     return render(request, 'ver_rankigs.html', {'ranking': ranking_final})
+
+def gestion(request):
+    return render(request, 'gestion.html')
+
+def categorias(request):
+    return render(request, 'categorias.html')

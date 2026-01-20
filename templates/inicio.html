@@ -9,23 +9,53 @@
 <img src="{% static 'images/logo.png' %}" class="logo-centrado" alt="Logo">
 
 <div class="text-center">
-{% if user.is_authenticated %}
-    <h2 class="simpson-title">¡Hola, {{ user.nombre }}!</h2>
-    <p class="text-white fw-bold" style="text-shadow: 2px 2px 0 #000;">Bienvenido a Springfield</p>
-{% else %}
-    <h2 class="simpson-title">¡Ouch! No has iniciado sesión</h2>
-{% endif %}
+    {% if user.is_authenticated %}
+        <h2 class="simpson-title">¡Hola, {{ user.nombre }}!</h2>
+        <p class="text-white fw-bold" style="text-shadow: 2px 2px 0 #000;">Bienvenido a Springfield</p>
+    {% else %}
+        <h2 class="simpson-title">¡Ouch! No has iniciado sesión</h2>
+    {% endif %}
 </div>
 
 <div class="nav-simpson">
-    <a href="/characters" class="btn-simpson">Personajes</a>
+
+    <a href="/characters" class="btn-simpson"
+       style="width: 200px; height: 100px; display: inline-flex; align-items: center; justify-content: center; padding: 5px;">
+        <img src="{% static 'images/personajes.png' %}" style="max-width: 100%; max-height: 100%; object-fit: contain;"
+             alt="Personajes">
+    </a>
 
     {% if user.is_authenticated %}
-        <a href="/ranking" class="btn-simpson">¡Puntúa personajes!</a>
-        <a href="/ver_rankings" class="btn-simpson">Votos</a>
-        <a href="/logout" class="btn-simpson">Salir</a>
+        <a href="/ranking" class="btn-simpson"
+           style="width: 200px; height: 100px; display: inline-flex; align-items: center; justify-content: center; padding: 5px;">
+            <img src="{% static 'images/rankear.png' %}" style="max-width: 100%; max-height: 100%; object-fit: contain;"
+                 alt="Rankear">
+        </a>
+
+        <a href="/ver_rankings" class="btn-simpson"
+           style="width: 200px; height: 100px; display: inline-flex; align-items: center; justify-content: center; padding: 5px;">
+            <img src="{% static 'images/ranking.png' %}" style="max-width: 100%; max-height: 100%; object-fit: contain;"
+                 alt="Votos">
+        </a>
+
+        {% if user.rol == 'admin' %}
+            <a href="/gestion" class="btn-simpson"
+               style="width: 200px; height: 100px; display: inline-flex; align-items: center; justify-content: center; padding: 5px; text-align: center; font-weight: bold;">
+                Panel de Control
+            </a>
+        {% endif %}
+
+        <a href="/logout" class="btn-simpson"
+           style="width: 200px; height: 100px; display: inline-flex; align-items: center; justify-content: center; padding: 5px;">
+            <img src="{% static 'images/salir.png' %}" style="max-width: 100%; max-height: 100%; object-fit: contain;"
+                 alt="Salir">
+        </a>
+
     {% else %}
-        <a href="/login" class="btn-simpson">Login</a>
-        <a href="/registro" class="btn-simpson">Registro</a>
+        <a href="/login" class="btn-simpson"
+           style="width: 200px; height: 100px; display: inline-flex; align-items: center; justify-content: center;">Login</a>
+        <a href="/registro" class="btn-simpson"
+           style="width: 200px; height: 100px; display: inline-flex; align-items: center; justify-content: center;">Registro</a>
     {% endif %}
+
 </div>

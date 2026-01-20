@@ -43,3 +43,19 @@ body::before {
     transform: scale(1.05) rotate(-2deg);
     box-shadow: 2px 2px 0px #000;
 }
+
+
+.nav-simpson {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    background: rgba(255, 255, 255, 0.3);
+    border-top: 5px solid #FFD90F;
+    padding: 20px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 15px;
+}
