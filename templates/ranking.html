@@ -7,7 +7,7 @@
 
 <div class="container mt-4">
 
-<a href="/" class="btn-simpson d-inline-block mb-5">Volver</a>
+    <a href="/" class="btn-simpson d-inline-block mb-5">Volver</a>
 
     <div id="tier-container">
         <div class="tier-row d-flex">
@@ -22,16 +22,38 @@
             <div class="tier-label b-tier">B</div>
             <div class="tier-content sortable-list"></div>
         </div>
+        <div class="tier-row d-flex">
+            <div class="tier-label c-tier">C</div>
+            <div class="tier-content sortable-list"></div>
+        </div>
+        <div class="tier-row d-flex">
+            <div class="tier-label d-tier">D</div>
+            <div class="tier-content sortable-list"></div>
+        </div>
+        <div class="tier-row d-flex">
+            <div class="tier-label e-tier">E</div>
+            <div class="tier-content sortable-list"></div>
+        </div>
+        <div class="tier-row d-flex">
+            <div class="tier-label f-tier">F</div>
+            <div class="tier-content sortable-list"></div>
+        </div>
     </div>
 
     <div class="mt-5 p-4 bg-dark rounded shadow">
         <h3 class="text-white mb-3">Personajes Disponibles</h3>
         <div id="character-pool" class="sortable-list d-flex flex-wrap gap-2">
+
             {% for c in characters %}
                 <div class="tier-card" data-id="{{ c.id }}">
-                    <img src="https://cdn.thesimpsonsapi.com/500{{ c.image }}" alt="{{ c.name }}" title="{{ c.name }}">
+                    <img src="
+                            {% if 'http' in c.image %}{{ c.image }}{% else %}https://cdn.thesimpsonsapi.com/500{{ c.image }}{% endif %}"
+                         alt="{{ c.name }}"
+                         title="{{ c.name }}"
+                         style="width: 80px; height: 80px; object-fit: contain; padding: 5px;">
                 </div>
             {% endfor %}
+
         </div>
     </div>
 

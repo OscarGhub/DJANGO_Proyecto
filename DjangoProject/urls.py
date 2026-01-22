@@ -22,6 +22,7 @@ from app import views
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('', views.inicio, name='inicio'),
+    path('user_panel/', views.user_panel, name='user_panel'),
     path('characters/', views.characters, name='characters'),
     path('registro/', views.registrar_usuario, name='registro'),
      path('login/', views.login_usuario, name='login'),
@@ -29,5 +30,7 @@ urlpatterns = [
     path('ranking/', views.ranking,name='ranking'),
     path('ver_rankings/', views.ver_rankings,name='ver_rankings'),
     path('gestion/', views.gestion,name='gestion'),
-    path('categorias/', views.categorias,name='categorias')
+    path('categorias/', views.categorias,name='categorias'),
+    path('mas_personajes', views.mas_personajes,name='mas_personajes'),
+    path('mas_categorias', views.mas_categorias,name='mas_categorias'),
 ]

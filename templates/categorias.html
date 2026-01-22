@@ -1,0 +1,54 @@
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+{% load static %}
+<link rel="stylesheet" href="{% static 'css/global.css' %}">
+<link rel="stylesheet" href="{% static 'css/categorias.css' %}">
+
+<body>
+<div class="container mt-5">
+
+    <div class="text-center mb-5">
+        <a href="/" class="btn-simpson d-inline-block mt-2">Volver</a>
+    </div>
+
+    <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
+        {% for cat in categorias %}
+            <div class="col">
+                <a href="/ranking?category={{ cat.code }}" class="text-decoration-none">
+
+                    <div class="card h-100 card-character text-center">
+
+                        {% if cat.image %}
+                            <img src="{{ cat.image }}" class="card-img-top" alt="{{ cat.name }}"
+                                 style="height: 180px; object-fit: contain;">
+                        {% else %}
+                            <img src="{% static 'images/categoria.png' %}" class="card-img-top"
+                                 alt="Categoría" style="height: 180px; object-fit: contain;">
+                        {% endif %}
+
+                        <div class="card-body">
+                            <h3>
+                                {{ cat.name }}
+                            </h3>
+                            <p>{{ cat.description }}</p>
+
+                            <div>
+                                {{ cat.characters|length }} Personajes
+                            </div>
+                        </div>
+
+                    </div>
+                </a>
+            </div>
+        {% empty %}
+            <div class="col-12 text-center">
+                <div class="alert alert-warning border-dark fw-bold">
+                    ¡Mosquis! No hay categorías en la base de datos de MongoDB.
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+</div>
+
+</body>

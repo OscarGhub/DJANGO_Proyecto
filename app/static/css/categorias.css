@@ -1,0 +1,19 @@
+div.card.card-character.text-center {
+    background-color: #FFD90F !important;
+    border: 3px solid #000 !important;
+    border-radius: 15px !important;
+    box-shadow: 6px 6px 0px #000 !important;
+    transition: all 0.2s ease-in-out !important;
+    overflow: hidden !important;
+}
+
+div.card.card-character.text-center:hover {
+    transform: scale(1.05)!important;
+    box-shadow: 3px 3px 0 #000 !important;
+}
+
+div.card.card-character img {
+    background-color: rgba(255, 255, 255, 0.3) !important;
+    padding: 10px !important;
+    border-bottom: 3px solid #000 !important;
+}

@@ -1,0 +1,7 @@
+.card-character-mas {
+    background-color: white !important;
+    border: 3px solid #FFD90F !important;
+    border-radius: 15px;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    overflow: hidden;
+}

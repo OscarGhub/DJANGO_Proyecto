@@ -14,10 +14,14 @@
         {% for c in characters %}
             <div class="col">
                 <div class="card h-100 shadow-sm card-character">
-                    <img src="https://cdn.thesimpsonsapi.com/500{{ c.image }}"
+
+                    <img src="
+                         {% if 'http' in c.image %}{{ c.image }}{% else %}https://cdn.thesimpsonsapi.com/500{{ c.image }}{% endif %}"
                          class="card-img-top"
                          alt="{{ c.name }}"
-                         style="height: 250px; object-fit: contain;"> <div class="card-body d-flex flex-column text-center">
+                         style="height: 250px; object-fit: contain; padding: 10px;">
+
+                    <div class="card-body d-flex flex-column text-center">
                         <h5 class="card-title fw-bold text-dark">{{ c.name }}</h5>
                         <p class="card-text text-muted flex-grow-1">
                             {{ c.description }}

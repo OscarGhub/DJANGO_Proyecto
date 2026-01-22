@@ -70,6 +70,21 @@ class Ranking(models.Model):
         managed = False
 
 
+class Category(models.Model):
+    code = models.IntegerField(null=False, unique=True)
+    name = models.CharField(max_length=100)
+    description = models.CharField(max_length=400)
+    characters = ArrayField(models.IntegerField())
+    image = models.CharField(max_length=300)
+
+    def __str__(self):
+        return self.name
+
+    class Meta:
+        db_table = 'category'
+        managed = False
+
+
 # SQLITE MODELS
 class Usuario(AbstractBaseUser, PermissionsMixin):
     ROLES = (
