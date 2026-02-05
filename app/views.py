@@ -1,18 +1,11 @@
-import csv
-import io
-
-from django.contrib import messages
 from django.contrib.auth import logout, authenticate, login
 from django.db.models import Avg
 from django.http import HttpResponse
-from django.shortcuts import render, redirect
 from django.utils import timezone
 
 from .forms import LoginForm, RegistroForm
-from .models import Character, Category
 from .models import Review, Usuario
 from .services import sync_simpsons_characters
-import re
 
 
 # Create your views here.
@@ -201,6 +194,14 @@ def valorar_personaje(request):
     return redirect('characters')
 
 
+import csv
+import io
+import re
+from django.shortcuts import render, redirect
+from django.contrib import messages
+from .models import Character, Category
+
+
 def insertar_csv(request):
     if request.method == 'POST' and request.FILES.get('archivo_csv'):
         tipo = request.POST.get('tipo_dato')
@@ -210,41 +211,49 @@ def insertar_csv(request):
             data_set = archivo.read().decode('utf-8-sig')
             io_string = io.StringIO(data_set)
             reader = csv.DictReader(io_string)
-            reader.fieldnames = [name.strip() for name in reader.fieldnames]
+
+            if reader.fieldnames:
+                reader.fieldnames = [name.strip().lower() for name in reader.fieldnames]
 
             contador = 0
             for row in reader:
                 row = {k: v.strip() if v else v for k, v in row.items()}
-                if not row.get('code'): continue
 
-                codigo_val = int(row['code'])
+                if not row.get('code'):
+                    continue
+
+                try:
+                    codigo_val = int(row['code'])
+                except ValueError:
+                    continue
 
                 if tipo == 'personaje':
-                    obj = Character.objects.using('mongodb').filter(code=codigo_val).first()
-                    if obj:
-                        obj.name = row.get('name', '')
-                        obj.description = row.get('description', '')
-                        obj.image = row.get('image', '')
-                        obj.save(using='mongodb')
-                    else:
+                    actualizados = Character.objects.using('mongodb').filter(code=codigo_val).update(
+                        name=row.get('name', ''),
+                        description=row.get('description', ''),
+                        image=row.get('image', '')
+                    )
+
+                    if actualizados == 0:
                         Character.objects.using('mongodb').create(
                             code=codigo_val,
                             name=row.get('name', ''),
                             description=row.get('description', ''),
                             image=row.get('image', '')
                         )
+
                 else:
                     chars_raw = row.get('characters', '')
-                    lista_ids = [int(n) for n in re.findall(r'\d+', chars_raw)]
+                    lista_ids = [int(n) for n in re.findall(r'\d+', str(chars_raw))]
 
-                    obj = Category.objects.using('mongodb').filter(code=codigo_val).first()
-                    if obj:
-                        obj.name = row.get('name', '')
-                        obj.description = row.get('description', '')
-                        obj.image = row.get('image', '')
-                        obj.characters = lista_ids
-                        obj.save(using='mongodb')
-                    else:
+                    actualizados = Category.objects.using('mongodb').filter(code=codigo_val).update(
+                        name=row.get('name', ''),
+                        description=row.get('description', ''),
+                        image=row.get('image', ''),
+                        characters=lista_ids
+                    )
+
+                    if actualizados == 0:
                         Category.objects.using('mongodb').create(
                             code=codigo_val,
                             name=row.get('name', ''),
@@ -255,9 +264,10 @@ def insertar_csv(request):
 
                 contador += 1
 
-            messages.success(request, f'¡Excelente! {contador} registros procesados.')
+            messages.success(request, f'¡Excelente! {contador} registros procesados correctamente.')
+
         except Exception as e:
-            messages.error(request, f'Error: {e}')
+            messages.error(request, f'Hubo un problema al procesar el archivo: {e}')
 
         return redirect('gestion')
 
@@ -276,6 +286,6 @@ def descargar_plantilla_csv(request):
         writer.writerow(['150', 'Homer', 'Inspector de seguridad', 'www.png_ejemplo_personaje.com'])
     else:
         writer.writerow(['code', 'name', 'description', 'image', 'characters'])
-        writer.writerow(['20', 'Familia', 'Los Simpson originales', 'www.png_ejemplo_personaje.com', '1-2-3-4-5'])
+        writer.writerow(['20', 'Familia', 'Los Simpson originales', 'www.png_ejemplo_personaje.com', '1,2,3,4,5'])
 
     return response
