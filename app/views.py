@@ -1,11 +1,18 @@
+import csv
+import io
+
+from django.contrib import messages
 from django.contrib.auth import logout, authenticate, login
 from django.db.models import Avg
+from django.http import HttpResponse
 from django.shortcuts import render, redirect
+from django.utils import timezone
 
 from .forms import LoginForm, RegistroForm
-from .models import Character, Review, Category, Usuario
-from .services import sync_simpsons_characters
 from .models import Character, Category
+from .models import Review, Usuario
+from .services import sync_simpsons_characters
+import re
 
 
 # Create your views here.
@@ -17,8 +24,18 @@ def characters(request):
     if not Character.objects.using('mongodb').exists():
         sync_simpsons_characters()
 
-    characters = Character.objects.using('mongodb').all()
-    return render(request, 'characters.html', {'characters': characters})
+    todos_personajes = Character.objects.using('mongodb').all()
+
+    for c in todos_personajes:
+        marca_voto = f"Voto para: {c.name}"
+        votos = Review.objects.using('mongodb').filter(comment=marca_voto)
+
+        promedio = votos.aggregate(Avg('rating'))['rating__avg'] or 0
+
+        c.media = round(promedio, 1)
+        c.estrellas_completas = range(int(promedio))
+
+    return render(request, 'characters.html', {'characters': todos_personajes})
 
 
 def registrar_usuario(request):
@@ -74,7 +91,7 @@ def ranking(request):
 
 
 def ver_rankings(request):
-    return render(request, 'ver_rankigs.html')
+    return render(request, 'ver_rankings.html')
 
 
 def mejores_votados(request):
@@ -93,7 +110,7 @@ def mejores_votados(request):
         })
 
     ranking_final = sorted(ranking_final, key=lambda x: x['puntuacion'], reverse=True)
-    return render(request, 'ver_rankigs.html', {'ranking': ranking_final})
+    return render(request, 'ver_rankings.html', {'ranking': ranking_final})
 
 
 def gestion(request):
@@ -147,7 +164,118 @@ def mas_categorias(request):
         'siguiente_codigo': siguiente_codigo,
         'personajes': todos_personajes})
 
+
 def user_panel(request):
     usuarios = Usuario.objects.all()
 
-    return render(request,'user_panel.html', {'usuarios': usuarios})
+    return render(request, 'user_panel.html', {'usuarios': usuarios})
+
+
+def valorar_personaje(request):
+    if request.method == 'POST' and request.user.is_authenticated:
+        p_name = request.POST.get('character_name').strip()
+        nota = int(request.POST.get('rating'))
+
+        usuario_email = request.user.email
+        marca_comentario = f"Voto para: {p_name}"
+
+        voto_existente = Review.objects.using('mongodb').filter(
+            user=usuario_email,
+            comment=marca_comentario
+        ).first()
+
+        if voto_existente:
+            voto_existente.rating = nota
+            voto_existente.reviewDate = timezone.now()
+            voto_existente.save(using='mongodb')
+            messages.success(request, f"¡Nota de {p_name} actualizada!")
+        else:
+            Review.objects.using('mongodb').create(
+                user=usuario_email,
+                rating=nota,
+                comment=marca_comentario,
+                reviewDate=timezone.now()
+            )
+            messages.success(request, f"¡Has votado a {p_name}!")
+
+    return redirect('characters')
+
+
+def insertar_csv(request):
+    if request.method == 'POST' and request.FILES.get('archivo_csv'):
+        tipo = request.POST.get('tipo_dato')
+        archivo = request.FILES['archivo_csv']
+
+        try:
+            data_set = archivo.read().decode('utf-8-sig')
+            io_string = io.StringIO(data_set)
+            reader = csv.DictReader(io_string)
+            reader.fieldnames = [name.strip() for name in reader.fieldnames]
+
+            contador = 0
+            for row in reader:
+                row = {k: v.strip() if v else v for k, v in row.items()}
+                if not row.get('code'): continue
+
+                codigo_val = int(row['code'])
+
+                if tipo == 'personaje':
+                    obj = Character.objects.using('mongodb').filter(code=codigo_val).first()
+                    if obj:
+                        obj.name = row.get('name', '')
+                        obj.description = row.get('description', '')
+                        obj.image = row.get('image', '')
+                        obj.save(using='mongodb')
+                    else:
+                        Character.objects.using('mongodb').create(
+                            code=codigo_val,
+                            name=row.get('name', ''),
+                            description=row.get('description', ''),
+                            image=row.get('image', '')
+                        )
+                else:
+                    chars_raw = row.get('characters', '')
+                    lista_ids = [int(n) for n in re.findall(r'\d+', chars_raw)]
+
+                    obj = Category.objects.using('mongodb').filter(code=codigo_val).first()
+                    if obj:
+                        obj.name = row.get('name', '')
+                        obj.description = row.get('description', '')
+                        obj.image = row.get('image', '')
+                        obj.characters = lista_ids
+                        obj.save(using='mongodb')
+                    else:
+                        Category.objects.using('mongodb').create(
+                            code=codigo_val,
+                            name=row.get('name', ''),
+                            description=row.get('description', ''),
+                            image=row.get('image', ''),
+                            characters=lista_ids
+                        )
+
+                contador += 1
+
+            messages.success(request, f'¡Excelente! {contador} registros procesados.')
+        except Exception as e:
+            messages.error(request, f'Error: {e}')
+
+        return redirect('gestion')
+
+    return render(request, 'insertar_csv.html')
+
+
+def descargar_plantilla_csv(request):
+    tipo = request.GET.get('tipo', 'personaje')
+    response = HttpResponse(content_type='text/csv')
+    response['Content-Disposition'] = f'attachment; filename="plantilla_{tipo}.csv"'
+
+    writer = csv.writer(response)
+
+    if tipo == 'personaje':
+        writer.writerow(['code', 'name', 'description', 'image'])
+        writer.writerow(['150', 'Homer', 'Inspector de seguridad', 'www.png_ejemplo_personaje.com'])
+    else:
+        writer.writerow(['code', 'name', 'description', 'image', 'characters'])
+        writer.writerow(['20', 'Familia', 'Los Simpson originales', 'www.png_ejemplo_personaje.com', '1-2-3-4-5'])
+
+    return response

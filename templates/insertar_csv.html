@@ -1,0 +1,80 @@
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+{% load static %}
+<link rel="stylesheet" href="{% static 'css/global.css' %}">
+
+<body class="bg-light">
+
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card shadow border-dark p-4">
+
+                <h2 class="text-center mb-4">IMPORTAR CSV</h2>
+
+                {% if messages %}
+                    {% for message in messages %}
+                        <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                            {{ message }}
+                            <button type="button" data-bs-dismiss="alert" aria-label="Close"></button>
+                        </div>
+                    {% endfor %}
+                {% endif %}
+
+                <form method="POST" enctype="multipart/form-data" action="{% url 'insertar_csv' %}">
+                    {% csrf_token %}
+
+                    <div class="mb-4">
+                        <label class="form-label fw-bold">1. ¿Qué tipo de archivo vas a subir?</label>
+                        <div class="d-flex gap-4 p-2 border rounded bg-white">
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" name="tipo_dato" value="personaje"
+                                       id="tipoP" checked>
+                                <label class="form-check-label" for="tipoP">Personajes</label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" name="tipo_dato" value="categoria"
+                                       id="tipoC">
+                                <label class="form-check-label" for="tipoC">Categorías</label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mb-4">
+                        <label class="form-label fw-bold">2. Selecciona el archivo .csv:</label>
+                        <input type="file" name="archivo_csv" class="form-control border-dark" accept=".csv" required>
+                        <div class="form-text mt-2">
+                            <strong>Formato requerido:</strong> código, nombre, descripción, imagen (URL)
+                        </div>
+                    </div>
+
+                    <div class="text-center d-flex gap-2">
+                        <button type="submit" class="btn-simpson w-100">Subir</button>
+                        <a href="{% url 'gestion' %}" class="btn-simpson w-100"
+                           style="background-color: #2c2e32; color: white">Cancelar</a>
+                    </div>
+                </form>
+            </div>
+
+            <div class="text-center mb-4">
+                <br><small style="color: #FFD90F">Descarga una plantilla si no sabes el formato:</small><br>
+                <a href="{% url 'descargar_csv' %}?tipo=personaje" class="btn btn-sm btn-link">Plantilla Personajes</a>
+                <a href="{% url 'descargar_csv' %}?tipo=categoria" class="btn btn-sm btn-link">Plantilla Categorías</a>
+            </div>
+
+            <div class="mt-4 alert alert-info border-dark">
+                <h5><i class="bi bi-info-circle"></i> Personajes:</h5>
+                <img src="{% static 'images/csv_ejemplo_personaje.png' %}" alt="Ejemplo CSV Personaje"
+                     style="max-width: 100%;">
+                <h5 style="margin-top: 10px;"><i class="bi bi-info-circle"></i> Categorías:</h5>
+                <img src="{% static 'images/csv_ejemplo_categoria.png' %}" alt="Ejemplo CSV Personaje"
+                     style="max-width: 100%;">
+            </div>
+
+        </div>
+    </div>
+</div>
+
+</body>
+</html>
