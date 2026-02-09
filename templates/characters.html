@@ -12,7 +12,8 @@
         {% for c in characters %}
             <div class="col">
                 <div class="card h-100 shadow-sm card-character">
-                    <img src="{% if 'http' in c.image %}{{ c.image }}{% else %}https://cdn.thesimpsonsapi.com/500{{ c.image }}{% endif %}"
+                    <img src="
+                            {% if 'http' in c.image %}{{ c.image }}{% else %}https://cdn.thesimpsonsapi.com/500{{ c.image }}{% endif %}"
                          class="card-img-top"
                          alt="{{ c.name }}"
                          style="height: 250px; object-fit: contain; padding: 10px;">
@@ -29,21 +30,36 @@
                         </p>
 
                         {% if user.is_authenticated %}
-                        <hr>
-                        <form action="{% url 'valorar_personaje' %}" method="POST" class="mt-auto">
-                            {% csrf_token %}
-                            <input type="hidden" name="character_name" value="{{ c.name }}">
-                            <div class="input-group input-group-sm">
-                                <select name="rating" class="form-select">
-                                    <option value="5">5</option>
-                                    <option value="4">4</option>
-                                    <option value="3">3</option>
-                                    <option value="2">2</option>
-                                    <option value="1">1</option>
-                                </select>
-                                <button class="btn btn-outline-primary" type="submit">Votar</button>
-                            </div>
-                        </form>
+                            <hr>
+                            {% if user.rol == 'admin' %}
+                                <div class="d-grid gap-2">
+                                    <a href="{% url 'editar_personaje' c.code %}" class="btn btn-sm btn-outline-dark">
+                                        Editar
+                                    </a>
+                                    <form action="{% url 'borrar_personaje' c.code %}" method="POST"
+                                          onsubmit="return confirm('¿Seguro que quieres borrar a {{ c.name }}?');">
+                                        {% csrf_token %}
+                                        <button type="submit" class="btn btn-sm btn-outline-danger w-100">
+                                            Borrar
+                                        </button>
+                                    </form>
+                                </div>
+                            {% else %}
+                                <form action="{% url 'valorar_personaje' %}" method="POST" class="mt-auto">
+                                    {% csrf_token %}
+                                    <input type="hidden" name="character_name" value="{{ c.name }}">
+                                    <div class="input-group input-group-sm">
+                                        <select name="rating" class="form-select">
+                                            <option value="5">5</option>
+                                            <option value="4">4</option>
+                                            <option value="3">3</option>
+                                            <option value="2">2</option>
+                                            <option value="1">1</option>
+                                        </select>
+                                        <button class="btn btn-outline-primary" type="submit">Votar</button>
+                                    </div>
+                                </form>
+                            {% endif %}
                         {% endif %}
                     </div>
                 </div>

@@ -35,5 +35,7 @@ urlpatterns = [
     path('mas_categorias', views.mas_categorias, name='mas_categorias'),
     path('insertar_csv', views.insertar_csv, name='insertar_csv'),
     path('descargar_csv/', views.descargar_plantilla_csv, name='descargar_csv'),
-    path('valorar_personaje/', views.valorar_personaje, name='valorar_personaje')
+    path('valorar_personaje/', views.valorar_personaje, name='valorar_personaje'),
+    path('borrar_personaje/<int:code>/', views.borrar_personaje, name='borrar_personaje'),
+    path('editar_personaje/<int:code>/', views.editar_personaje, name='editar_personaje'),
 ]

@@ -289,3 +289,32 @@ def descargar_plantilla_csv(request):
         writer.writerow(['20', 'Familia', 'Los Simpson originales', 'www.png_ejemplo_personaje.com', '1,2,3,4,5'])
 
     return response
+
+
+def borrar_personaje(request, code):
+    if request.method == 'POST' and request.user.is_authenticated and request.user.rol == 'admin':
+        deleted_count = Character.objects.using('mongodb').filter(code=code).delete()
+
+        if deleted_count:
+            messages.success(request, f"Personaje con código {code} eliminado correctamente.")
+        else:
+            messages.error(request, "No se pudo encontrar el personaje para borrar.")
+
+    return redirect('characters')
+
+
+def editar_personaje(request, code):
+    if not (request.user.is_authenticated and request.user.rol == 'admin'):
+        return redirect('characters')
+
+    personaje = Character.objects.using('mongodb').filter(code=code).first()
+
+    if request.method == 'POST':
+        personaje.name = request.POST.get('name')
+        personaje.description = request.POST.get('description')
+        personaje.image = request.POST.get('image')
+        personaje.save(using='mongodb')
+        messages.success(request, f"{personaje.name} actualizado correctamente.")
+        return redirect('characters')
+
+    return render(request, 'mas_personajes.html', {'personaje': personaje})
