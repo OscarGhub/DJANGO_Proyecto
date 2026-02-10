@@ -33,9 +33,6 @@
                             <hr>
                             {% if user.rol == 'admin' %}
                                 <div class="d-grid gap-2">
-                                    <a href="{% url 'editar_personaje' c.code %}" class="btn btn-sm btn-outline-dark">
-                                        Editar
-                                    </a>
                                     <form action="{% url 'borrar_personaje' c.code %}" method="POST"
                                           onsubmit="return confirm('¿Seguro que quieres borrar a {{ c.name }}?');">
                                         {% csrf_token %}
@@ -45,20 +42,40 @@
                                     </form>
                                 </div>
                             {% else %}
-                                <form action="{% url 'valorar_personaje' %}" method="POST" class="mt-auto">
-                                    {% csrf_token %}
-                                    <input type="hidden" name="character_name" value="{{ c.name }}">
-                                    <div class="input-group input-group-sm">
-                                        <select name="rating" class="form-select">
-                                            <option value="5">5</option>
-                                            <option value="4">4</option>
-                                            <option value="3">3</option>
-                                            <option value="2">2</option>
-                                            <option value="1">1</option>
-                                        </select>
-                                        <button class="btn btn-outline-primary" type="submit">Votar</button>
-                                    </div>
-                                </form>
+                                <div id="voto-box-{{ forloop.counter }}">
+
+                                    {% if c.ya_votado %}
+                                        <div class="alert alert-success py-1 px-2 mb-2 d-flex justify-content-between align-items-center">
+                                            <small class="fw-bold">¡Votado!</small>
+                                            <button type="button"
+                                                    class="btn btn-sm btn-link p-0 text-success text-decoration-none fw-bold"
+                                                    onclick="habilitarVoto('{{ forloop.counter }}')">Cambiar
+                                            </button>
+                                        </div>
+                                    {% endif %}
+
+                                    <form action="{% url 'valorar_personaje' %}" method="POST"
+                                          class="mt-auto {% if c.ya_votado %}d-none{% endif %}"
+                                          id="form-voto-{{ forloop.counter }}">
+                                        {% csrf_token %}
+                                        <input type="hidden" name="character_name" value="{{ c.name }}">
+                                        <div class="input-group input-group-sm">
+                                            <select name="rating" class="form-select border-primary">
+                                                <option value="5">5</option>
+                                                <option value="4">4</option>
+                                                <option value="3">3</option>
+                                                <option value="2">2</option>
+                                                <option value="1">1</option>
+                                            </select>
+                                            <button class="btn btn-primary" type="submit">Votar</button>
+                                        </div>
+                                        {% if c.ya_votado %}
+                                            <button type="button" class="btn btn-sm text-muted w-100 mt-1"
+                                                    onclick="cancelarCambio('{{ forloop.counter }}')">Cancelar
+                                            </button>
+                                        {% endif %}
+                                    </form>
+                                </div>
                             {% endif %}
                         {% endif %}
                     </div>
@@ -71,3 +88,25 @@
         {% endfor %}
     </div>
 </div>
+
+<script>
+    function habilitarVoto(id) {
+        const form = document.getElementById('form-voto-' + id);
+        const aviso = form.previousElementSibling; // El div de la alerta
+
+        form.classList.remove('d-none');
+        if (aviso && aviso.classList.contains('alert')) {
+            aviso.classList.add('d-none');
+        }
+    }
+
+    function cancelarCambio(id) {
+        const form = document.getElementById('form-voto-' + id);
+        const aviso = form.previousElementSibling;
+
+        form.classList.add('d-none');
+        if (aviso && aviso.classList.contains('alert')) {
+            aviso.classList.remove('d-none');
+        }
+    }
+</script>

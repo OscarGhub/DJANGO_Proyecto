@@ -9,31 +9,40 @@
         <div class="col-md-6">
             <div class="card-character-mas p-4 shadow">
 
-                <form method="POST" action="{% url 'mas_categorias' %}">
+                <h3 class="text-center mb-4">
+                    {% if categoria %} Editar Categoría {% else %} Nueva Categoría {% endif %}
+                </h3>
+
+                <form method="POST" action="
+
+                        {% if categoria %}{% url 'editar_categoria' categoria.code %}{% else %}{% url 'mas_categorias' %}{% endif %}">
                     {% csrf_token %}
 
                     <div class="mb-3">
                         <label class="form-label fw-bold">Código de Categoría:</label>
-                        <input type="number" name="code" value="{{ siguiente_codigo }}"
+                        <input type="number" name="code"
+                               value="{% if categoria %}{{ categoria.code }}{% else %}{{ siguiente_codigo }}{% endif %}"
                                class="form-control border-dark bg-light" readonly>
                     </div>
 
                     <div class="mb-3">
                         <label class="form-label fw-bold">Nombre de la Categoría:</label>
                         <input type="text" name="name" class="form-control border-dark"
+                               value="{{ categoria.name|default:'' }}"
                                placeholder="Ej: Secundarios de Lujo" required>
                     </div>
 
                     <div class="mb-3">
                         <label class="form-label fw-bold">Descripción:</label>
                         <textarea name="description" class="form-control border-dark" rows="3"
-                                  placeholder="Ej: Personajes que no salen siempre pero son míticos"
-                                  required></textarea>
+                                  placeholder="Ej: Personajes que no salen siempre..."
+                                  required>{{ categoria.description|default:'' }}</textarea>
                     </div>
 
                     <div class="mb-3">
                         <label class="form-label fw-bold">URL de la Imagen:</label>
                         <input type="text" name="image" class="form-control border-dark"
+                               value="{{ categoria.image|default:'' }}"
                                placeholder="Ej: https://..." required>
                     </div>
 
@@ -43,31 +52,33 @@
                              style="max-height: 250px; overflow-y: auto; border: 2px solid #ffd300; background: #fff; padding: 10px; border-radius: 5px;">
                             <div class="row g-2">
                                 {% for p in personajes %}
-
                                     <div class="col-6">
-
                                         <div class="form-check d-flex align-items-center gap-2 border p-1 rounded">
                                             <input class="form-check-input ms-1" type="checkbox" name="personajes_ids"
-                                                   value="{{ p.code }}" id="p-{{ p.code }}">
+                                                   value="{{ p.code }}" id="p-{{ p.code }}"
+                                                   {% if categoria and p.code in categoria.characters %}checked{% endif %}>
+
                                             <label class="form-check-label d-flex align-items-center"
                                                    for="p-{{ p.code }}" style="cursor: pointer; font-size: 0.85rem;">
-                                                <img src="{% if 'http' in p.image %}{{ p.image }}{% else %}https://cdn.thesimpsonsapi.com/500{{ p.image }}{% endif %}"
+                                                <img src="
+
+                                                        {% if 'http' in p.image %}{{ p.image }}{% else %}https://cdn.thesimpsonsapi.com/500{{ p.image }}{% endif %}"
                                                      alt="{{ p.name }}"
                                                      style="width: 35px; height: 35px; object-fit: contain; margin-right: 8px;">
                                                 {{ p.name }}
                                             </label>
                                         </div>
-
                                     </div>
-
                                 {% endfor %}
                             </div>
                         </div>
                     </div>
 
                     <div class="text-center mt-4 d-flex gap-2">
-                        <button type="submit" class="btn-simpson w-100">Crear Categoría</button>
-                        <a href="{% url 'gestion' %}" class="btn-simpson w-100">Cancelar</a>
+                        <button type="submit" class="btn-simpson w-100">
+                            {% if categoria %} Guardar Cambios {% else %} Crear Categoría {% endif %}
+                        </button>
+                        <a href="{% url 'gestion' %}" class="btn-simpson w-100" style="background-color: #6c757d;">Cancelar</a>
                     </div>
                 </form>
             </div>

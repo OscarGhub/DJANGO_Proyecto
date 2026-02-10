@@ -4,11 +4,31 @@ from django.http import HttpResponse
 from django.utils import timezone
 
 from .forms import LoginForm, RegistroForm
+from .models import Ranking
 from .models import Review, Usuario
 from .services import sync_simpsons_characters
 
+import csv
+import io
+import re
+from django.shortcuts import render, redirect
+from django.contrib import messages
+from .models import Character, Category
+
 
 # Create your views here.
+
+def actualizar_desde_api(request):
+    if request.user.is_authenticated and request.user.rol == 'admin':
+        try:
+            sync_simpsons_characters()
+            messages.success(request, "¡Mosquis! Los datos se han sincronizado con la API correctamente.")
+        except Exception as e:
+            messages.error(request, f"Hubo un error al conectar con la API: {e}")
+
+    return redirect('gestion')
+
+
 def inicio(request):
     return render(request, 'inicio.html')
 
@@ -19,10 +39,18 @@ def characters(request):
 
     todos_personajes = Character.objects.using('mongodb').all()
 
+    votos_usuario = []
+    if request.user.is_authenticated:
+        votos_usuario = Review.objects.using('mongodb').filter(
+            user=request.user.email
+        ).values_list('comment', flat=True)
+
     for c in todos_personajes:
         marca_voto = f"Voto para: {c.name}"
-        votos = Review.objects.using('mongodb').filter(comment=marca_voto)
 
+        c.ya_votado = marca_voto in votos_usuario
+
+        votos = Review.objects.using('mongodb').filter(comment=marca_voto)
         promedio = votos.aggregate(Avg('rating'))['rating__avg'] or 0
 
         c.media = round(promedio, 1)
@@ -72,7 +100,6 @@ def ranking(request):
 
     if category_code:
         category = Category.objects.using('mongodb').filter(code=category_code).first()
-
         if category:
             characters = Character.objects.using('mongodb').filter(code__in=category.characters)
         else:
@@ -80,11 +107,10 @@ def ranking(request):
     else:
         characters = Character.objects.using('mongodb').all()
 
-    return render(request, 'ranking.html', {'characters': characters})
-
-
-def ver_rankings(request):
-    return render(request, 'ver_rankings.html')
+    return render(request, 'ranking.html', {
+        'characters': characters,
+        'category_code': category_code
+    })
 
 
 def mejores_votados(request):
@@ -93,16 +119,43 @@ def mejores_votados(request):
     ranking_final = []
 
     for c in characters:
-        votos = Review.objects.using('mongodb').filter(comment__icontains=c.name)
+        votos = Review.objects.using('mongodb').filter(comment=f"Voto para: {c.name}")
         promedio = votos.aggregate(Avg('rating'))['rating__avg'] or 0
 
         ranking_final.append({
             'character': c,
             'puntuacion': round(promedio, 1),
-            'estrellas': range(int(promedio))
         })
 
     ranking_final = sorted(ranking_final, key=lambda x: x['puntuacion'], reverse=True)
+    return render(request, 'ver_rankings.html', {'ranking': ranking_final})
+
+
+def mejores_ranking(request):
+    personajes = Character.objects.using('mongodb').all()
+    todos_los_rankings = Ranking.objects.using('mongodb').all()
+
+    ranking_final = []
+
+    for p in personajes:
+        posiciones = []
+
+        for r in todos_los_rankings:
+            if p.code in r.rankingList:
+                posicion = r.rankingList.index(p.code) + 1
+                posiciones.append(posicion)
+
+        if posiciones:
+            media_posicion = sum(posiciones) / len(posiciones)
+            veces_rankeado = len(posiciones)
+
+            ranking_final.append({
+                'character': p,
+                'posicion_media': round(media_posicion, 1),
+                'total_listas': veces_rankeado
+            })
+
+    ranking_final = sorted(ranking_final, key=lambda x: x['posicion_media'])
     return render(request, 'ver_rankings.html', {'ranking': ranking_final})
 
 
@@ -168,21 +221,18 @@ def valorar_personaje(request):
     if request.method == 'POST' and request.user.is_authenticated:
         p_name = request.POST.get('character_name').strip()
         nota = int(request.POST.get('rating'))
-
         usuario_email = request.user.email
         marca_comentario = f"Voto para: {p_name}"
 
-        voto_existente = Review.objects.using('mongodb').filter(
+        actualizado = Review.objects.using('mongodb').filter(
             user=usuario_email,
             comment=marca_comentario
-        ).first()
+        ).update(
+            rating=nota,
+            reviewDate=timezone.now()
+        )
 
-        if voto_existente:
-            voto_existente.rating = nota
-            voto_existente.reviewDate = timezone.now()
-            voto_existente.save(using='mongodb')
-            messages.success(request, f"¡Nota de {p_name} actualizada!")
-        else:
+        if actualizado == 0:
             Review.objects.using('mongodb').create(
                 user=usuario_email,
                 rating=nota,
@@ -190,16 +240,10 @@ def valorar_personaje(request):
                 reviewDate=timezone.now()
             )
             messages.success(request, f"¡Has votado a {p_name}!")
+        else:
+            messages.success(request, f"¡Nota de {p_name} actualizada!")
 
     return redirect('characters')
-
-
-import csv
-import io
-import re
-from django.shortcuts import render, redirect
-from django.contrib import messages
-from .models import Character, Category
 
 
 def insertar_csv(request):
@@ -303,18 +347,78 @@ def borrar_personaje(request, code):
     return redirect('characters')
 
 
-def editar_personaje(request, code):
+def editar_categoria(request, code):
     if not (request.user.is_authenticated and request.user.rol == 'admin'):
-        return redirect('characters')
+        return redirect('categorias')
 
-    personaje = Character.objects.using('mongodb').filter(code=code).first()
+    categoria = Category.objects.using('mongodb').filter(code=code).first()
+    todos_personajes = Character.objects.using('mongodb').all().order_by('name')
 
     if request.method == 'POST':
-        personaje.name = request.POST.get('name')
-        personaje.description = request.POST.get('description')
-        personaje.image = request.POST.get('image')
-        personaje.save(using='mongodb')
-        messages.success(request, f"{personaje.name} actualizado correctamente.")
-        return redirect('characters')
+        nuevo_nombre = request.POST.get('name')
+        nueva_desc = request.POST.get('description')
+        nueva_img = request.POST.get('image')
+        ids_seleccionados = [int(x) for x in request.POST.getlist('personajes_ids')]
 
-    return render(request, 'mas_personajes.html', {'personaje': personaje})
+        Category.objects.using('mongodb').filter(code=code).update(
+            name=nuevo_nombre,
+            description=nueva_desc,
+            image=nueva_img,
+            characters=ids_seleccionados
+        )
+
+        messages.success(request, f"Categoría '{nuevo_nombre}' actualizada correctamente.")
+        return redirect('categorias')
+
+    return render(request, 'mas_categorias.html', {
+        'categoria': categoria,
+        'personajes': todos_personajes
+    })
+
+
+def borrar_categoria(request, code):
+    if request.method == 'POST' and request.user.is_authenticated and request.user.rol == 'admin':
+        if code:
+            res = Category.objects.using('mongodb').filter(code=int(code)).delete()
+            messages.success(request, "Categoría eliminada con éxito.")
+        else:
+            messages.error(request, "Error: Código de categoría no válido.")
+
+    return redirect('categorias')
+
+
+def guardar_ranking(request):
+    if request.method == "POST":
+        if not request.user.is_authenticated:
+            messages.error(request, "Debes iniciar sesión para guardar tu ranking.")
+            return redirect('login')
+
+        category_code = request.POST.get('category_code')
+        personajes_ids = request.POST.get('ranking_data')
+
+        if not personajes_ids or not category_code:
+            messages.error(request, "El ranking está vacío o no es válido.")
+            return redirect('categorias')
+
+        try:
+            ranking_enteros = [int(pid) for pid in personajes_ids.split(',') if pid]
+
+            Ranking.objects.using('mongodb').filter(
+                user=request.user.email,
+                categoryCode=int(category_code)
+            ).delete()
+
+            nuevo_ranking = Ranking(
+                user=request.user.email,
+                rankingDate=timezone.now(),
+                categoryCode=int(category_code),
+                rankingList=ranking_enteros
+            )
+            nuevo_ranking.save(using='mongodb')
+
+            messages.success(request, "¡Yuju! Tu ranking se ha guardado correctamente.")
+
+        except Exception as e:
+            messages.error(request, f"Hubo un error al guardar: {e}")
+
+    return redirect('categorias')

@@ -1,7 +1,6 @@
+{% load static %}
 <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-
-{% load static %}
 <link rel="stylesheet" href="{% static 'css/global.css' %}">
 <link rel="stylesheet" href="{% static 'css/categorias.css' %}">
 
@@ -15,31 +14,64 @@
     <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
         {% for cat in categorias %}
             <div class="col">
-                <a href="/ranking?category={{ cat.code }}" class="text-decoration-none">
+                <div class="card h-100 card-character text-center shadow-sm">
 
-                    <div class="card h-100 card-character text-center">
+                    {% if user.rol == 'admin' %}
+                        <div class="p-0">
+                            {% if cat.image %}
+                                <img src="{{ cat.image }}" class="card-img-top" alt="{{ cat.name }}"
+                                     style="height: 180px; object-fit: contain; padding: 10px;">
+                            {% else %}
+                                <img src="{% static 'images/categoria.png' %}" class="card-img-top"
+                                     alt="Categoría" style="height: 180px; object-fit: contain; padding: 10px;">
+                            {% endif %}
 
-                        {% if cat.image %}
-                            <img src="{{ cat.image }}" class="card-img-top" alt="{{ cat.name }}"
-                                 style="height: 180px; object-fit: contain;">
-                        {% else %}
-                            <img src="{% static 'images/categoria.png' %}" class="card-img-top"
-                                 alt="Categoría" style="height: 180px; object-fit: contain;">
-                        {% endif %}
-
-                        <div class="card-body">
-                            <h3>
-                                {{ cat.name }}
-                            </h3>
-                            <p>{{ cat.description }}</p>
-
-                            <div>
-                                {{ cat.characters|length }} Personajes
+                            <div class="card-body text-dark">
+                                <h3 class="fw-bold">{{ cat.name }}</h3>
+                                <p class="text-muted small">{{ cat.description }}</p>
+                                <div class="badge bg-info text-dark">
+                                    {{ cat.characters|length }} Personajes
+                                </div>
                             </div>
                         </div>
+                    {% else %}
+                        <a href="/ranking?category={{ cat.code }}" class="text-decoration-none text-dark">
+                            {% if cat.image %}
+                                <img src="{{ cat.image }}" class="card-img-top" alt="{{ cat.name }}"
+                                     style="height: 180px; object-fit: contain; padding: 10px;">
+                            {% else %}
+                                <img src="{% static 'images/categoria.png' %}" class="card-img-top"
+                                     alt="Categoría" style="height: 180px; object-fit: contain; padding: 10px;">
+                            {% endif %}
 
-                    </div>
-                </a>
+                            <div class="card-body">
+                                <h3 class="fw-bold">{{ cat.name }}</h3>
+                                <p class="text-muted small">{{ cat.description }}</p>
+                                <div class="badge bg-info text-dark">
+                                    {{ cat.characters|length }} Personajes
+                                </div>
+                            </div>
+                        </a>
+                    {% endif %}
+
+                    {% if user.is_authenticated and user.rol == 'admin' %}
+                        <div class="card-footer bg-transparent border-0 pb-3">
+                            <hr>
+                            <div class="d-grid gap-2">
+                                <a href="{% url 'editar_categoria' cat.code %}" class="btn btn-sm btn-outline-dark">
+                                    Editar Categoría
+                                </a>
+                                <form action="{% url 'borrar_categoria' cat.code %}" method="POST"
+                                      onsubmit="return confirm('¿Seguro que quieres borrar la categoría {{ cat.name }}?');">
+                                    {% csrf_token %}
+                                    <button type="submit" class="btn btn-sm btn-outline-danger w-100">
+                                        Borrar Categoría
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+                    {% endif %}
+                </div>
             </div>
         {% empty %}
             <div class="col-12 text-center">
@@ -50,5 +82,4 @@
         {% endfor %}
     </div>
 </div>
-
 </body>

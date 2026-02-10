@@ -5,16 +5,50 @@
 <link rel="stylesheet" href="{% static 'css/global.css' %}">
 <link rel="stylesheet" href="{% static 'css/gestion.css' %}">
 
-<div class="container mt-5">
+<div class="container mt-5 d-flex flex-column align-items-center">
 
-    <div style="display: flex !important; justify-content: center !important; align-items: center !important; flex-wrap: wrap;">
-        <a href="/mas_categorias" class="btn-simpson">+ Categorías</a>
-        <a href="/mas_personajes" class="btn-simpson"> + Personajes</a>
-        <a href="/user_panel" class="btn-simpson">Usuarios</a>
-        <a href="/insertar_csv" class="btn-simpson">Insertar CSV</a>
+    <div class="d-flex justify-content-center align-items-center flex-wrap gap-3 mb-5">
+
+        <a href="/mas_categorias" class="btn-simpson d-flex align-items-center gap-2">
+            <img class="img" src="{% static 'images/categoria.png' %}" alt="Categoría">
+            <span>+Categorías</span>
+        </a>
+
+        <a href="/mas_personajes" class="btn-simpson d-flex align-items-center gap-2">
+            <img class="img" src="{% static 'images/personajes.png' %}" alt="Personajes">
+            <span>+Personajes</span>
+        </a>
+
+        <a href="/user_panel" class="btn-simpson d-flex align-items-center gap-2">
+            <img class="img" src="{% static 'images/user_panel.png' %}" alt="Usuarios">
+            <span>Usuarios</span>
+        </a>
+
+        <a href="/insertar_csv" class="btn-simpson d-flex align-items-center gap-2">
+            <img class="img" src="{% static 'images/csv_imagen.png' %}" alt="Insertar CSV">
+            <span>Insertar CSV</span>
+        </a>
+
     </div>
 
-    <div class="text-center mt-5">
-        <a href="/" style="color: #fff; text-decoration: underline; font-weight: bold;">← Volver al Inicio</a>
+    <div class="row justify-content-center w-100 mb-5">
+        <div class="col-md-8 col-lg-6">
+            <div class="card p-4 border-warning shadow-sm text-center"
+                 style="background-color: #fdfdfd; border-width: 2px; border-radius: 15px;">
+                <h4 class="fw-bold">Sincronización Externa</h4>
+                <p class="text-muted">Si faltan personajes o quieres restaurar los datos originales directamente desde
+                    la API oficial:</p>
+
+                <a href="{% url 'actualizar_api' %}" class="btn btn-warning fw-bold px-4"
+                   onclick="return confirm('¡Mosquis! Esto descargará los datos de la API. ¿Continuar?')">
+                    Importar Datos de la API
+                </a>
+            </div>
+        </div>
     </div>
+
+    <div class="w-100 text-center mt-3">
+        <a href="/" class="btn-simpson d-inline-block">Volver al Inicio</a>
+    </div>
+
 </div>

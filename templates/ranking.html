@@ -45,7 +45,7 @@
         <div id="character-pool" class="sortable-list d-flex flex-wrap gap-2">
 
             {% for c in characters %}
-                <div class="tier-card" data-id="{{ c.id }}">
+                <div class="tier-card" data-id="{{ c.code }}">
                     <img src="
                             {% if 'http' in c.image %}{{ c.image }}{% else %}https://cdn.thesimpsonsapi.com/500{{ c.image }}{% endif %}"
                          alt="{{ c.name }}"
@@ -57,9 +57,15 @@
         </div>
     </div>
 
-    <div class="text-center mt-4 mb-5">
-        <a href="/" class="btn-simpson">Guardar y Salir</a>
-    </div>
+    <form id="ranking-form" method="POST" action="{% url 'guardar_ranking' %}">
+        {% csrf_token %}
+        <input type="hidden" name="category_code" value="{{ category_code }}">
+        <input type="hidden" name="ranking_data" id="ranking-data">
+
+        <div class="text-center mt-4 mb-5">
+            <button type="submit" class="btn-simpson">Guardar y Salir</button>
+        </div>
+    </form>
 
 </div>
 
@@ -72,5 +78,39 @@
             animation: 150,
             ghostClass: 'ghost'
         });
+    });
+
+    document.getElementById('ranking-form').addEventListener('submit', function (e) {
+        const characterPool = document.getElementById('character-pool');
+        const remainingCharacters = characterPool.querySelectorAll('.tier-card').length;
+
+        if (remainingCharacters > 0) {
+            e.preventDefault();
+            alert("¡Mosquis! Aún te quedan " + remainingCharacters + " personajes por clasificar. Tienes que ponerlos todos en algún Tier.");
+            return;
+        }
+
+        const orderedIds = [];
+        const cardsInTiers = document.querySelectorAll('#tier-container .tier-card');
+
+        cardsInTiers.forEach(card => {
+            const id = card.getAttribute('data-id');
+            if (id) {
+                orderedIds.push(id);
+            }
+        });
+
+        if (orderedIds.length === 0) {
+            e.preventDefault();
+            alert("¡Ouch! El ranking está vacío.");
+            return;
+        }
+
+        const confirmacion = confirm("¿Estás seguro de que este es tu ranking definitivo?");
+        if (!confirmacion) {
+            e.preventDefault();
+        } else {
+            document.getElementById('ranking-data').value = orderedIds.join(',');
+        }
     });
 </script>
