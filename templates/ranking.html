@@ -86,21 +86,24 @@
 
         if (remainingCharacters > 0) {
             e.preventDefault();
-            alert("¡Mosquis! Aún te quedan " + remainingCharacters + " personajes por clasificar. Tienes que ponerlos todos en algún Tier.");
+            alert("¡Mosquis! Tienes que clasificar a todos los personajes en algún Tier antes de guardar.");
             return;
         }
 
-        const orderedIds = [];
-        const cardsInTiers = document.querySelectorAll('#tier-container .tier-card');
+        const tierData = {};
+        const rows = document.querySelectorAll('.tier-row');
+        let totalAsignados = 0;
 
-        cardsInTiers.forEach(card => {
-            const id = card.getAttribute('data-id');
-            if (id) {
-                orderedIds.push(id);
-            }
+        rows.forEach(row => {
+            const tierLabel = row.querySelector('.tier-label').innerText.trim();
+            const cards = row.querySelectorAll('.tier-card');
+            const ids = Array.from(cards).map(card => card.getAttribute('data-id'));
+
+            tierData[tierLabel] = ids;
+            totalAsignados += ids.length;
         });
 
-        if (orderedIds.length === 0) {
+        if (totalAsignados === 0) {
             e.preventDefault();
             alert("¡Ouch! El ranking está vacío.");
             return;
@@ -110,7 +113,7 @@
         if (!confirmacion) {
             e.preventDefault();
         } else {
-            document.getElementById('ranking-data').value = orderedIds.join(',');
+            document.getElementById('ranking-data').value = JSON.stringify(tierData);
         }
     });
 </script>

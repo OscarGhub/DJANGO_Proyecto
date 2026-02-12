@@ -58,12 +58,12 @@ class Review(models.Model):
 
 class Ranking(models.Model):
     user = models.CharField(max_length=100)
-    rankingDate = models.DateField(default=timezone.now)
+    rankingDate = models.DateTimeField(default=timezone.now)
     categoryCode = models.IntegerField(null=False)
-    rankingList = ArrayField(models.IntegerField())
+    rankingList = models.JSONField()
 
     def __str__(self):
-        return self.user + " " + str(self.rankingList)
+        return f"{self.user} - Categoría {self.categoryCode}"
 
     class Meta:
         db_table = 'ranking'

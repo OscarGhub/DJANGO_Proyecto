@@ -5,6 +5,16 @@
 <link rel="stylesheet" href="{% static 'css/global.css' %}">
 <link rel="stylesheet" href="{% static 'css/inicio.css' %}">
 
+<audio id="bg-music" loop>
+    <source src="{% static 'audio/simpsons-theme.mp3' %}" type="audio/mpeg">
+    Tu navegador no soporta el elemento de audio.
+</audio>
+
+<div style="position: fixed; top: 20px; right: 20px; z-index: 1000;">
+    <button id="music-control" class="btn btn-warning rounded-circle shadow" style="width: 50px; height: 50px;">
+        <span id="music-icon">🔇</span>
+    </button>
+</div>
 
 <img src="{% static 'images/logo.png' %}" class="logo-centrado" alt="Logo">
 
@@ -40,8 +50,8 @@
 
         {% if user.rol == 'admin' %}
             <a href="/gestion" class="btn-simpson"
-               style="width: 200px; height: 100px; display: inline-flex; align-items: center; justify-content: center; padding: 5px; text-align: center; font-weight: bold;">
-                Panel de Control
+               style="width: 200px; height: 100px; display: inline-flex; align-items: center; justify-content: center; padding: 5px; text-align: center; font-weight: bold; background-color: #ff69b4; color: white; border: 4px solid #fff; border-radius: 50px; text-shadow: 1px 1px 0 #000; box-shadow: 0 0 15px #ff69b4;">
+                PANEL CONTROL
             </a>
         {% endif %}
 
@@ -59,3 +69,25 @@
     {% endif %}
 
 </div>
+
+<script>
+    const music = document.getElementById('bg-music');
+    const btn = document.getElementById('music-control');
+    const icon = document.getElementById('music-icon');
+
+    music.volume = 0.4;
+
+    btn.addEventListener('click', function () {
+        if (music.paused) {
+            music.play();
+            icon.innerText = '🔊';
+            btn.classList.remove('btn-warning');
+            btn.classList.add('btn-success');
+        } else {
+            music.pause();
+            icon.innerText = '🔇';
+            btn.classList.remove('btn-success');
+            btn.classList.add('btn-warning');
+        }
+    });
+</script>

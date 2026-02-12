@@ -13,6 +13,12 @@
             <div class="col">
                 <div class="card h-100 shadow-sm card-character">
                     <img src="
+
+
+
+
+
+
                             {% if 'http' in c.image %}{{ c.image }}{% else %}https://cdn.thesimpsonsapi.com/500{{ c.image }}{% endif %}"
                          class="card-img-top"
                          alt="{{ c.name }}"
@@ -59,6 +65,7 @@
                                           id="form-voto-{{ forloop.counter }}">
                                         {% csrf_token %}
                                         <input type="hidden" name="character_name" value="{{ c.name }}">
+
                                         <div class="input-group input-group-sm">
                                             <select name="rating" class="form-select border-primary">
                                                 <option value="5">5</option>
@@ -68,7 +75,14 @@
                                                 <option value="1">1</option>
                                             </select>
                                             <button class="btn btn-primary" type="submit">Votar</button>
+                                            <div class="mt-2">
+                                            <textarea name="comentario_usuario"
+                                                      class="form-control form-control-sm border-primary"
+                                                      placeholder="Tu opinión..."
+                                                      rows="2"
+                                                      maxlength="200"></textarea></div>
                                         </div>
+
                                         {% if c.ya_votado %}
                                             <button type="button" class="btn btn-sm text-muted w-100 mt-1"
                                                     onclick="cancelarCambio('{{ forloop.counter }}')">Cancelar

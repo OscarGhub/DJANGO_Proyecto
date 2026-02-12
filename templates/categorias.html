@@ -14,7 +14,7 @@
     <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
         {% for cat in categorias %}
             <div class="col">
-                <div class="card h-100 card-character text-center shadow-sm">
+                <div class="card h-100 card-character text-center shadow-sm {% if cat.ya_rankeado and user.rol != 'admin' %}card-completada{% endif %}">
 
                     {% if user.rol == 'admin' %}
                         <div class="p-0">
@@ -32,6 +32,18 @@
                                 <div class="badge bg-info text-dark">
                                     {{ cat.characters|length }} Personajes
                                 </div>
+                            </div>
+                        </div>
+                    {% elif cat.ya_rankeado %}
+                        <div class="p-0">
+                            {% if cat.image %}
+                                <img src="{{ cat.image }}" class="card-img-top" alt="{{ cat.name }}"
+                                     style="height: 180px; object-fit: contain; padding: 10px;">
+                            {% endif %}
+                            <div class="card-body">
+                                <h3 class="fw-bold text-muted">{{ cat.name }}</h3>
+                                <p class="text-muted small">{{ cat.description }}</p>
+                                <div class="badge bg-secondary">Ranking Completado</div>
                             </div>
                         </div>
                     {% else %}

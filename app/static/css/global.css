@@ -6,6 +6,14 @@ body {
     overflow-x: hidden;
 }
 
+.s-tier { background-color: #ff7f7f !important; color: #000; }
+.a-tier { background-color: #ffbf7f !important; color: #000; }
+.b-tier { background-color: #ffff7f !important; color: #000; }
+.c-tier { background-color: #bfff7f !important; color: #000; }
+.d-tier { background-color: #7fff7f !important; color: #000; }
+.e-tier { background-color: #7fffff !important; color: #000; }
+.f-tier { background-color: #bf7fff !important; color: #000; }
+
 body::before {
     content: "";
     position: fixed;

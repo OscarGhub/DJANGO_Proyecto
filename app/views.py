@@ -48,9 +48,9 @@ def characters(request):
     for c in todos_personajes:
         marca_voto = f"Voto para: {c.name}"
 
-        c.ya_votado = marca_voto in votos_usuario
+        c.ya_votado = any(voto.startswith(marca_voto) for voto in votos_usuario)
 
-        votos = Review.objects.using('mongodb').filter(comment=marca_voto)
+        votos = Review.objects.using('mongodb').filter(comment__startswith=marca_voto)
         promedio = votos.aggregate(Avg('rating'))['rating__avg'] or 0
 
         c.media = round(promedio, 1)
@@ -132,31 +132,40 @@ def mejores_votados(request):
 
 
 def mejores_ranking(request):
+    categorias = Category.objects.using('mongodb').all()
     personajes = Character.objects.using('mongodb').all()
     todos_los_rankings = Ranking.objects.using('mongodb').all()
 
-    ranking_final = []
+    pesos = {'S': 1, 'A': 2, 'B': 3, 'C': 4, 'D': 5, 'E': 6, 'F': 7}
+    ranking_por_categorias = []
 
-    for p in personajes:
-        posiciones = []
+    for cat in categorias:
+        ranking_categoria = []
+        rankings_de_esta_cat = [r for r in todos_los_rankings if r.categoryCode == cat.code]
 
-        for r in todos_los_rankings:
-            if p.code in r.rankingList:
-                posicion = r.rankingList.index(p.code) + 1
-                posiciones.append(posicion)
+        if rankings_de_esta_cat:
+            personajes_de_cat = [p for p in personajes if p.code in cat.characters]
 
-        if posiciones:
-            media_posicion = sum(posiciones) / len(posiciones)
-            veces_rankeado = len(posiciones)
+            for p in personajes_de_cat:
+                puntuaciones = []
+                for r in rankings_de_esta_cat:
+                    for tier, ids in r.rankingList.items():
+                        if str(p.code) in [str(id) for id in ids]:
+                            puntuaciones.append(pesos.get(tier, 7))
+                            break
 
-            ranking_final.append({
-                'character': p,
-                'posicion_media': round(media_posicion, 1),
-                'total_listas': veces_rankeado
-            })
+                if puntuaciones:
+                    media = sum(puntuaciones) / len(puntuaciones)
+                    ranking_categoria.append({
+                        'character': p,
+                        'posicion_media': round(media, 1),
+                        'total_listas': len(puntuaciones)
+                    })
 
-    ranking_final = sorted(ranking_final, key=lambda x: x['posicion_media'])
-    return render(request, 'ver_rankings.html', {'ranking': ranking_final})
+            ranking_categoria = sorted(ranking_categoria, key=lambda x: x['posicion_media'])
+            ranking_por_categorias.append({'categoria': cat, 'ranking': ranking_categoria})
+
+    return render(request, 'ver_rankings.html', {'datos_agrupados': ranking_por_categorias})
 
 
 def gestion(request):
@@ -165,6 +174,16 @@ def gestion(request):
 
 def categorias(request):
     lista_categorias = Category.objects.using('mongodb').all().order_by('code')
+
+    categorias_rankeadas = []
+    if request.user.is_authenticated:
+        categorias_rankeadas = Ranking.objects.using('mongodb').filter(
+            user=request.user.email
+        ).values_list('categoryCode', flat=True)
+
+    for cat in lista_categorias:
+        cat.ya_rankeado = cat.code in categorias_rankeadas
+
     return render(request, 'categorias.html', {'categorias': lista_categorias})
 
 
@@ -222,13 +241,18 @@ def valorar_personaje(request):
         p_name = request.POST.get('character_name').strip()
         nota = int(request.POST.get('rating'))
         usuario_email = request.user.email
+
+        texto_usuario = request.POST.get('comentario_usuario', '').strip()
         marca_comentario = f"Voto para: {p_name}"
+
+        comentario_final = f"{marca_comentario}. Comentario: {texto_usuario}" if texto_usuario else marca_comentario
 
         actualizado = Review.objects.using('mongodb').filter(
             user=usuario_email,
-            comment=marca_comentario
+            comment__startswith=marca_comentario
         ).update(
             rating=nota,
+            comment=comentario_final,
             reviewDate=timezone.now()
         )
 
@@ -236,12 +260,12 @@ def valorar_personaje(request):
             Review.objects.using('mongodb').create(
                 user=usuario_email,
                 rating=nota,
-                comment=marca_comentario,
+                comment=comentario_final,
                 reviewDate=timezone.now()
             )
             messages.success(request, f"¡Has votado a {p_name}!")
         else:
-            messages.success(request, f"¡Nota de {p_name} actualizada!")
+            messages.success(request, f"¡Nota y comentario de {p_name} actualizados!")
 
     return redirect('characters')
 
@@ -387,6 +411,9 @@ def borrar_categoria(request, code):
     return redirect('categorias')
 
 
+import json  # No olvides importar json al principio del archivo
+
+
 def guardar_ranking(request):
     if request.method == "POST":
         if not request.user.is_authenticated:
@@ -394,14 +421,14 @@ def guardar_ranking(request):
             return redirect('login')
 
         category_code = request.POST.get('category_code')
-        personajes_ids = request.POST.get('ranking_data')
+        ranking_data_raw = request.POST.get('ranking_data')
 
-        if not personajes_ids or not category_code:
+        if not ranking_data_raw or not category_code:
             messages.error(request, "El ranking está vacío o no es válido.")
             return redirect('categorias')
 
         try:
-            ranking_enteros = [int(pid) for pid in personajes_ids.split(',') if pid]
+            tier_dict = json.loads(ranking_data_raw)
 
             Ranking.objects.using('mongodb').filter(
                 user=request.user.email,
@@ -412,11 +439,11 @@ def guardar_ranking(request):
                 user=request.user.email,
                 rankingDate=timezone.now(),
                 categoryCode=int(category_code),
-                rankingList=ranking_enteros
+                rankingList=tier_dict
             )
             nuevo_ranking.save(using='mongodb')
 
-            messages.success(request, "¡Yuju! Tu ranking se ha guardado correctamente.")
+            messages.success(request, "¡Yuju! Tu Tier List se ha guardado correctamente.")
 
         except Exception as e:
             messages.error(request, f"Hubo un error al guardar: {e}")
