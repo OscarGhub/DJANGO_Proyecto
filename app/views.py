@@ -1,19 +1,19 @@
+import csv
+import io
+import json
+import re
+
+from django.contrib import messages
 from django.contrib.auth import logout, authenticate, login
-from django.db.models import Avg
 from django.http import HttpResponse
+from django.shortcuts import render, redirect
 from django.utils import timezone
 
 from .forms import LoginForm, RegistroForm
+from .models import Character, Category
 from .models import Ranking
 from .models import Review, Usuario
 from .services import sync_simpsons_characters
-
-import csv
-import io
-import re
-from django.shortcuts import render, redirect
-from django.contrib import messages
-from .models import Character, Category
 
 
 # Create your views here.
@@ -53,8 +53,8 @@ def characters(request):
         votos = Review.objects.using('mongodb').filter(comment__startswith=marca_voto)
         promedio = votos.aggregate(Avg('rating'))['rating__avg'] or 0
 
+        c.total_votos = votos.count()
         c.media = round(promedio, 1)
-        c.estrellas_completas = range(int(promedio))
 
     return render(request, 'characters.html', {'characters': todos_personajes})
 
@@ -285,56 +285,49 @@ def insertar_csv(request):
 
             contador = 0
             for row in reader:
-                row = {k: v.strip() if v else v for k, v in row.items()}
+                row = {
+                    k: (v.strip() if isinstance(v, str) else v)
+                    for k, v in row.items()
+                    if k is not None
+                }
 
                 if not row.get('code'):
                     continue
 
                 try:
                     codigo_val = int(row['code'])
-                except ValueError:
+                except (ValueError, TypeError):
                     continue
 
                 if tipo == 'personaje':
-                    actualizados = Character.objects.using('mongodb').filter(code=codigo_val).update(
-                        name=row.get('name', ''),
-                        description=row.get('description', ''),
-                        image=row.get('image', '')
+                    Character.objects.using('mongodb').update_or_create(
+                        code=codigo_val,
+                        defaults={
+                            'name': row.get('name', ''),
+                            'description': row.get('description', ''),
+                            'image': row.get('image', '')
+                        }
                     )
-
-                    if actualizados == 0:
-                        Character.objects.using('mongodb').create(
-                            code=codigo_val,
-                            name=row.get('name', ''),
-                            description=row.get('description', ''),
-                            image=row.get('image', '')
-                        )
-
                 else:
                     chars_raw = row.get('characters', '')
                     lista_ids = [int(n) for n in re.findall(r'\d+', str(chars_raw))]
 
-                    actualizados = Category.objects.using('mongodb').filter(code=codigo_val).update(
-                        name=row.get('name', ''),
-                        description=row.get('description', ''),
-                        image=row.get('image', ''),
-                        characters=lista_ids
+                    Category.objects.using('mongodb').update_or_create(
+                        code=codigo_val,
+                        defaults={
+                            'name': row.get('name', ''),
+                            'description': row.get('description', ''),
+                            'image': row.get('image', ''),
+                            'characters': lista_ids
+                        }
                     )
-
-                    if actualizados == 0:
-                        Category.objects.using('mongodb').create(
-                            code=codigo_val,
-                            name=row.get('name', ''),
-                            description=row.get('description', ''),
-                            image=row.get('image', ''),
-                            characters=lista_ids
-                        )
 
                 contador += 1
 
             messages.success(request, f'¡Excelente! {contador} registros procesados correctamente.')
 
         except Exception as e:
+            print(f"Error detallado: {e}")
             messages.error(request, f'Hubo un problema al procesar el archivo: {e}')
 
         return redirect('gestion')
@@ -411,9 +404,6 @@ def borrar_categoria(request, code):
     return redirect('categorias')
 
 
-import json  # No olvides importar json al principio del archivo
-
-
 def guardar_ranking(request):
     if request.method == "POST":
         if not request.user.is_authenticated:
@@ -449,3 +439,54 @@ def guardar_ranking(request):
             messages.error(request, f"Hubo un error al guardar: {e}")
 
     return redirect('categorias')
+
+
+from django.db.models import Avg
+
+
+def dashboard_admin(request):
+    if not (request.user.is_authenticated and request.user.rol == 'admin'):
+        return redirect('inicio')
+
+    total_usuarios = Usuario.objects.count()
+    total_personajes = Character.objects.using('mongodb').count()
+    total_rankings = Ranking.objects.using('mongodb').count()
+    total_reviews = Review.objects.using('mongodb').count()
+
+    characters = Character.objects.using('mongodb').all()
+    ranking_stats = []
+    for c in characters:
+        votos = Review.objects.using('mongodb').filter(comment__startswith=f"Voto para: {c.name}")
+        promedio = votos.aggregate(Avg('rating'))['rating__avg'] or 0
+        if votos.count() > 0:
+            ranking_stats.append({
+                'name': c.name,
+                'media': round(promedio, 1),
+                'votos': votos.count()
+            })
+
+    top_5 = sorted(ranking_stats, key=lambda x: x['media'], reverse=True)[:5]
+
+    categorias_stats = []
+    todas_cats = Category.objects.using('mongodb').all()
+
+    for cat in todas_cats:
+        num_rankings = Ranking.objects.using('mongodb').filter(categoryCode=cat.code).count()
+        if num_rankings > 0:
+            categorias_stats.append({
+                'name': cat.name,
+                'total': num_rankings
+            })
+
+    top_categorias = sorted(categorias_stats, key=lambda x: x['total'], reverse=True)[:3]
+
+    context = {
+        'total_usuarios': total_usuarios,
+        'total_personajes': total_personajes,
+        'total_rankings': total_rankings,
+        'total_reviews': total_reviews,
+        'top_5': top_5,
+        'top_categorias': top_categorias
+    }
+
+    return render(request, 'admin_resumen.html', context)

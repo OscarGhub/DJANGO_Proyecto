@@ -41,4 +41,5 @@ urlpatterns = [
     path('borrar_categoria/<int:code>/', views.borrar_categoria, name='borrar_categoria'),
     path('editar_categoria/<int:code>/', views.editar_categoria, name='editar_categoria'),
     path('guardar_ranking/', views.guardar_ranking, name='guardar_ranking'),
+    path('admin_resumen/', views.dashboard_admin, name='admin_resumen'),
 ]

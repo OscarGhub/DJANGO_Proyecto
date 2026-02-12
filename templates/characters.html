@@ -13,12 +13,6 @@
             <div class="col">
                 <div class="card h-100 shadow-sm card-character">
                     <img src="
-
-
-
-
-
-
                             {% if 'http' in c.image %}{{ c.image }}{% else %}https://cdn.thesimpsonsapi.com/500{{ c.image }}{% endif %}"
                          class="card-img-top"
                          alt="{{ c.name }}"
@@ -29,6 +23,11 @@
 
                         <div class="mb-2">
                             <span class="badge bg-warning text-dark">{{ c.media }}</span>
+                            ⭐
+                        </div>
+
+                        <div class="text-muted mt-1" style="font-size: 0.75rem; font-weight: bold;">
+                            {{ c.total_votos }} valoraciones
                         </div>
 
                         <p class="card-text text-muted flex-grow-1">

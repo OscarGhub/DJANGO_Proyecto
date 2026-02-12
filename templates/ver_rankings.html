@@ -9,64 +9,89 @@
         <a href="/" class="btn-simpson">Volver al Inicio</a>
     </div>
 
-    {% for grupo in datos_agrupados %}
-        <div class="mb-5 p-4 border rounded shadow-sm bg-light">
-            <div class="d-flex align-items-center mb-4">
-                {% if grupo.categoria.image %}
-                    <img src="{{ grupo.categoria.image }}" style="height: 50px; width: 50px; object-fit: contain;"
-                         class="me-3">
-                {% endif %}
-                <h3 class="fw-bold mb-0 text-primary">{{ grupo.categoria.name }}</h3>
-            </div>
+    <div class="accordion" id="accordionRankings">
+        {% for grupo in datos_agrupados %}
+            <div class="accordion-item mb-3 border-0 shadow-sm">
+                <h2 class="accordion-header" id="heading-{{ forloop.counter }}">
+                    <button class="accordion-button collapsed bg-light" type="button"
+                            data-bs-toggle="collapse"
+                            data-bs-target="#collapse-{{ forloop.counter }}"
+                            aria-expanded="false"
+                            aria-controls="collapse-{{ forloop.counter }}">
 
-            <div class="row row-cols-1 row-cols-md-3 row-cols-lg-4 g-4">
-                {% for item in grupo.ranking %}
-                    <div class="col">
-                        <div class="card h-100 shadow card-character text-center p-3">
-                            <span class="badge bg-dark position-absolute top-0 start-0 m-2" style="font-size: 0.9rem;">
-                                #{{ forloop.counter }}
-                            </span>
-
-                            <img src="
-                                    {% if 'http' in item.character.image %}{{ item.character.image }}{% else %}https://cdn.thesimpsonsapi.com/500{{ item.character.image }}{% endif %}"
-                                 class="card-img-top mx-auto"
-                                 style="height: 120px; width: auto; object-fit: contain;">
-
-                            <div class="card-body">
-                                <h6 class="card-title fw-bold">{{ item.character.name }}</h6>
-
-                                <div class="mb-2">
-                                    {% if item.posicion_media <= 1.5 %}
-                                        <span class="badge s-tier w-100 py-2">TIER S</span>
-                                    {% elif item.posicion_media <= 2.5 %}
-                                        <span class="badge a-tier w-100 py-2">TIER A</span>
-                                    {% elif item.posicion_media <= 3.5 %}
-                                        <span class="badge b-tier w-100 py-2">TIER B</span>
-                                    {% elif item.posicion_media <= 4.5 %}
-                                        <span class="badge c-tier w-100 py-2">TIER C</span>
-                                    {% elif item.posicion_media <= 5.5 %}
-                                        <span class="badge d-tier w-100 py-2">TIER D</span>
-                                    {% elif item.posicion_media <= 6.5 %}
-                                        <span class="badge e-tier w-100 py-2">TIER E</span>
-                                    {% else %}
-                                        <span class="badge f-tier w-100 py-2">TIER F</span>
-                                    {% endif %}
-                                </div>
-
-                                <div class="alert alert-light border py-1 small mb-1" style="font-size: 0.8rem;">
-                                    Valor medio: <strong>{{ item.posicion_media }}</strong>
-                                </div>
-
-                                <p class="card-text x-small text-muted mb-0" style="font-size: 0.7rem;">
-                                    Calculado en {{ item.total_listas }} rankings
-                                </p>
+                        <div class="d-flex align-items-center w-100">
+                            {% if grupo.categoria.image %}
+                                <img src="{{ grupo.categoria.image }}"
+                                     style="height: 40px; width: 40px; object-fit: contain;" class="me-3">
+                            {% endif %}
+                            <div>
+                                <span class="fw-bold text-primary h5 mb-0">{{ grupo.categoria.name }}</span>
+                                <small class="text-muted ms-3">({{ grupo.ranking|length }} personajes
+                                    rankeados)</small>
                             </div>
                         </div>
+                    </button>
+                </h2>
+
+                <div id="collapse-{{ forloop.counter }}"
+                     class="accordion-collapse collapse"
+                     aria-labelledby="heading-{{ forloop.counter }}"
+                     data-bs-parent="#accordionRankings">
+
+                    <div class="accordion-body bg-white">
+                        <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-4 g-4">
+                            {% for item in grupo.ranking %}
+                                <div class="col">
+                                    <div class="card h-100 shadow-sm card-character text-center p-3 border-0"
+                                         style="background: #fdfdfd;">
+                                        <span class="badge bg-dark position-absolute top-0 start-0 m-2">
+                                            #{{ forloop.counter }}
+                                        </span>
+
+                                        <img src="
+                                                {% if 'http' in item.character.image %}{{ item.character.image }}{% else %}https://cdn.thesimpsonsapi.com/500{{ item.character.image }}{% endif %}"
+                                             class="card-img-top mx-auto"
+                                             style="height: 100px; width: auto; object-fit: contain;">
+
+                                        <div class="card-body p-2">
+                                            <h6 class="card-title fw-bold small">{{ item.character.name }}</h6>
+
+                                            <div class="mb-2">
+                                                {% if item.posicion_media <= 1.5 %}
+                                                    <span class="badge s-tier w-100">TIER S</span>
+                                                {% elif item.posicion_media <= 2.5 %}
+                                                    <span class="badge a-tier w-100">TIER A</span>
+                                                {% elif item.posicion_media <= 3.5 %}
+                                                    <span class="badge b-tier w-100">TIER B</span>
+                                                {% elif item.posicion_media <= 4.5 %}
+                                                    <span class="badge c-tier w-100">TIER C</span>
+                                                {% elif item.posicion_media <= 5.5 %}
+                                                    <span class="badge d-tier w-100">TIER D</span>
+                                                {% elif item.posicion_media <= 6.5 %}
+                                                    <span class="badge e-tier w-100">TIER E</span>
+                                                {% else %}
+                                                    <span class="badge f-tier w-100">TIER F</span>
+                                                {% endif %}
+                                            </div>
+
+                                            <div class="alert alert-light border p-1 mb-1"
+                                                 style="font-size: 0.7rem;">
+                                                Puesto Medio: <strong>{{ item.posicion_media }}</strong>
+                                            </div>
+                                            <small class="text-muted" style="font-size: 0.65rem;">
+                                                Votos: {{ item.total_listas }}
+                                            </small>
+                                        </div>
+                                    </div>
+                                </div>
+                            {% endfor %}
+                        </div>
                     </div>
-                {% endfor %}
+                </div>
             </div>
-        </div>
-    {% empty %}
-        <div class="alert alert-info text-center">Todavía no hay rankings guardados en ninguna categoría.</div>
-    {% endfor %}
+        {% empty %}
+            <div class="alert alert-info text-center">Todavía no hay rankings guardados.</div>
+        {% endfor %}
+    </div>
+</div>
 </div>
