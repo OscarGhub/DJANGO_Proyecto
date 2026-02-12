@@ -9,28 +9,39 @@
         <a href="/" class="btn-simpson">Volver al Inicio</a>
     </div>
 
+    <div class="row justify-content-center mb-5">
+        <div class="col-md-6">
+            <div class="input-group shadow-sm">
+                <span class="input-group-text bg-warning border-dark">🔍</span>
+                <input type="text" id="searchCat" class="form-control border-dark p-3"
+                       placeholder="Buscar categoría (ej: Familia, Villanos...)"
+                       onkeyup="filtrarCategorias()">
+            </div>
+        </div>
+    </div>
+
     <div class="accordion" id="accordionRankings">
         {% for grupo in datos_agrupados %}
-            <div class="accordion-item mb-3 border-0 shadow-sm">
-                <h2 class="accordion-header" id="heading-{{ forloop.counter }}">
-                    <button class="accordion-button collapsed bg-light" type="button"
-                            data-bs-toggle="collapse"
-                            data-bs-target="#collapse-{{ forloop.counter }}"
-                            aria-expanded="false"
-                            aria-controls="collapse-{{ forloop.counter }}">
+            <div class="accordion-item mb-3 border-0 shadow-sm accordion-item-filtros"
+                 data-name="{{ grupo.categoria.name|lower }}">
+                <button class="accordion-button collapsed bg-light" type="button"
+                        data-bs-toggle="collapse"
+                        data-bs-target="#collapse-{{ forloop.counter }}"
+                        aria-expanded="false"
+                        aria-controls="collapse-{{ forloop.counter }}">
 
-                        <div class="d-flex align-items-center w-100">
-                            {% if grupo.categoria.image %}
-                                <img src="{{ grupo.categoria.image }}"
-                                     style="height: 40px; width: 40px; object-fit: contain;" class="me-3">
-                            {% endif %}
-                            <div>
-                                <span class="fw-bold text-primary h5 mb-0">{{ grupo.categoria.name }}</span>
-                                <small class="text-muted ms-3">({{ grupo.ranking|length }} personajes
-                                    rankeados)</small>
-                            </div>
+                    <div class="d-flex align-items-center w-100">
+                        {% if grupo.categoria.image %}
+                            <img src="{{ grupo.categoria.image }}"
+                                 style="height: 40px; width: 40px; object-fit: contain;" class="me-3">
+                        {% endif %}
+                        <div>
+                            <span class="fw-bold text-primary h5 mb-0">{{ grupo.categoria.name }}</span>
+                            <small class="text-muted ms-3">({{ grupo.ranking|length }} personajes
+                                rankeados)</small>
                         </div>
-                    </button>
+                    </div>
+                </button>
                 </h2>
 
                 <div id="collapse-{{ forloop.counter }}"
@@ -94,4 +105,21 @@
         {% endfor %}
     </div>
 </div>
-</div>
+
+<script>
+    function filtrarCategorias() {
+        let input = document.getElementById('searchCat').value.toLowerCase();
+
+        let categorias = document.querySelectorAll('.accordion-item-filtros');
+
+        categorias.forEach(cat => {
+            let nombre = cat.getAttribute('data-name') || "";
+
+            if (nombre.includes(input)) {
+                cat.style.setProperty('display', '', 'important');
+            } else {
+                cat.style.setProperty('display', 'none', 'important');
+            }
+        });
+    }
+</script>
