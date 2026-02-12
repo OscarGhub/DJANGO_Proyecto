@@ -8,9 +8,20 @@
 <div class="container mt-5">
     <a href="/" class="btn-simpson d-inline-block mb-5">Volver</a>
 
+    <div class="row justify-content-center mb-5">
+        <div class="col-md-6">
+            <div class="input-group shadow-sm">
+                <span class="input-group-text bg-warning border-dark"><i class="bi bi-search"></i>🔍</span>
+                <input type="text" id="searchInput" class="form-control border-dark p-3"
+                       placeholder="Escribe el nombre de un personaje (ej: Homer)..."
+                       onkeyup="filtrarPersonajes()">
+            </div>
+        </div>
+    </div>
+
     <div class="row row-cols-1 row-cols-md-2 row-cols-lg-4 g-4">
         {% for c in characters %}
-            <div class="col">
+            <div class="col personaje-item" data-name="{{ c.name|lower }}">
                 <div class="card h-100 shadow-sm card-character">
                     <img src="
                             {% if 'http' in c.image %}{{ c.image }}{% else %}https://cdn.thesimpsonsapi.com/500{{ c.image }}{% endif %}"
@@ -105,7 +116,7 @@
 <script>
     function habilitarVoto(id) {
         const form = document.getElementById('form-voto-' + id);
-        const aviso = form.previousElementSibling; // El div de la alerta
+        const aviso = form.previousElementSibling;
 
         form.classList.remove('d-none');
         if (aviso && aviso.classList.contains('alert')) {
@@ -120,6 +131,21 @@
         form.classList.add('d-none');
         if (aviso && aviso.classList.contains('alert')) {
             aviso.classList.remove('d-none');
+        }
+    }
+
+    function filtrarPersonajes() {
+        let input = document.getElementById('searchInput').value.toLowerCase();
+        let personajes = document.getElementsByClassName('personaje-item');
+
+        for (let i = 0; i < personajes.length; i++) {
+            let nombre = personajes[i].getAttribute('data-name');
+
+            if (nombre.includes(input)) {
+                personajes[i].style.display = "";
+            } else {
+                personajes[i].style.display = "none";
+            }
         }
     }
 </script>

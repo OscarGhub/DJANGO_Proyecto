@@ -11,9 +11,20 @@
         <a href="/" class="btn-simpson d-inline-block mt-2">Volver</a>
     </div>
 
-    <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
+    <div class="row justify-content-center mb-5">
+        <div class="col-md-6">
+            <div class="input-group shadow-sm">
+                <span class="input-group-text bg-warning border-dark">🔍</span>
+                <input type="text" id="searchCat" class="form-control border-dark p-3"
+                       placeholder="Buscar categoría (ej: Familia, Villanos...)"
+                       onkeyup="filtrarCategorias()">
+            </div>
+        </div>
+    </div>
+
+    <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4" id="contenedorCategorias">
         {% for cat in categorias %}
-            <div class="col">
+            <div class="col categoria-item" data-name="{{ cat.name|lower }}">
                 <div class="card h-100 card-character text-center shadow-sm {% if cat.ya_rankeado and user.rol != 'admin' %}card-completada{% endif %}">
 
                     {% if user.rol == 'admin' %}
@@ -94,4 +105,20 @@
         {% endfor %}
     </div>
 </div>
+
+<script>
+    function filtrarCategorias() {
+        let input = document.getElementById('searchCat').value.toLowerCase();
+        let categorias = document.querySelectorAll('.categoria-item');
+
+        categorias.forEach(cat => {
+            let nombre = cat.getAttribute('data-name') || "";
+            if (nombre.includes(input)) {
+                cat.style.setProperty('display', '', 'important');
+            } else {
+                cat.style.setProperty('display', 'none', 'important');
+            }
+        });
+    }
+</script>
 </body>
