@@ -1,6 +1,4 @@
 .card-completada {
     opacity: 0.6;
-    filter: grayscale(100%);
-    pointer-events: none;
     background-color: #f8f9fa;
 }

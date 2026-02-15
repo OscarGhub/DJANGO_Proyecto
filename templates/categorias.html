@@ -24,84 +24,91 @@
 
     <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4" id="contenedorCategorias">
         {% for cat in categorias %}
-            <div class="col categoria-item" data-name="{{ cat.name|lower }}">
-                <div class="card h-100 card-character text-center shadow-sm {% if cat.ya_rankeado and user.rol != 'admin' %}card-completada{% endif %}">
+        <div class="col categoria-item" data-name="{{ cat.name|lower }}">
+            <div class="card h-100 card-character text-center shadow-sm {% if cat.ya_rankeado and user.rol != 'admin' %}card-completada{% endif %}">
 
-                    {% if user.rol == 'admin' %}
-                        <div class="p-0">
-                            {% if cat.image %}
-                                <img src="{{ cat.image }}" class="card-img-top" alt="{{ cat.name }}"
-                                     style="height: 180px; object-fit: contain; padding: 10px;">
-                            {% else %}
-                                <img src="{% static 'images/categoria.png' %}" class="card-img-top"
-                                     alt="Categoría" style="height: 180px; object-fit: contain; padding: 10px;">
-                            {% endif %}
-
-                            <div class="card-body text-dark">
-                                <h3 class="fw-bold">{{ cat.name }}</h3>
-                                <p class="text-muted small">{{ cat.description }}</p>
-                                <div class="badge bg-info text-dark">
-                                    {{ cat.characters|length }} Personajes
-                                </div>
-                            </div>
-                        </div>
-                    {% elif cat.ya_rankeado %}
-                        <div class="p-0">
-                            {% if cat.image %}
-                                <img src="{{ cat.image }}" class="card-img-top" alt="{{ cat.name }}"
-                                     style="height: 180px; object-fit: contain; padding: 10px;">
-                            {% endif %}
-                            <div class="card-body">
-                                <h3 class="fw-bold text-muted">{{ cat.name }}</h3>
-                                <p class="text-muted small">{{ cat.description }}</p>
-                                <div class="badge bg-secondary">Ranking Completado</div>
-                            </div>
-                        </div>
+                {% if user.rol == 'admin' %}
+                <div class="p-0">
+                    {% if cat.image %}
+                    <img src="{{ cat.image }}" class="card-img-top" alt="{{ cat.name }}"
+                         style="height: 180px; object-fit: contain; padding: 10px;">
                     {% else %}
-                        <a href="/ranking?category={{ cat.code }}" class="text-decoration-none text-dark">
-                            {% if cat.image %}
-                                <img src="{{ cat.image }}" class="card-img-top" alt="{{ cat.name }}"
-                                     style="height: 180px; object-fit: contain; padding: 10px;">
-                            {% else %}
-                                <img src="{% static 'images/categoria.png' %}" class="card-img-top"
-                                     alt="Categoría" style="height: 180px; object-fit: contain; padding: 10px;">
-                            {% endif %}
-
-                            <div class="card-body">
-                                <h3 class="fw-bold">{{ cat.name }}</h3>
-                                <p class="text-muted small">{{ cat.description }}</p>
-                                <div class="badge bg-info text-dark">
-                                    {{ cat.characters|length }} Personajes
-                                </div>
-                            </div>
-                        </a>
+                    <img src="{% static 'images/categoria.png' %}" class="card-img-top"
+                         alt="Categoría" style="height: 180px; object-fit: contain; padding: 10px;">
                     {% endif %}
 
-                    {% if user.is_authenticated and user.rol == 'admin' %}
-                        <div class="card-footer bg-transparent border-0 pb-3">
-                            <hr>
-                            <div class="d-grid gap-2">
-                                <a href="{% url 'editar_categoria' cat.code %}" class="btn btn-sm btn-outline-dark">
-                                    Editar Categoría
-                                </a>
-                                <form action="{% url 'borrar_categoria' cat.code %}" method="POST"
-                                      onsubmit="return confirm('¿Seguro que quieres borrar la categoría {{ cat.name }}?');">
-                                    {% csrf_token %}
-                                    <button type="submit" class="btn btn-sm btn-outline-danger w-100">
-                                        Borrar Categoría
-                                    </button>
-                                </form>
-                            </div>
+                    <div class="card-body text-dark">
+                        <h3 class="fw-bold">{{ cat.name }}</h3>
+                        <p class="text-muted small">{{ cat.description }}</p>
+                        <div class="badge bg-info text-dark">
+                            {{ cat.characters|length }} Personajes
                         </div>
+                    </div>
+                </div>
+                {% elif cat.ya_rankeado %}
+                <div class="p-0">
+                    {% if cat.image %}
+                    <img src="{{ cat.image }}" class="card-img-top" alt="{{ cat.name }}"
+                         style="height: 180px; object-fit: contain; padding: 10px;">
                     {% endif %}
+                    <div class="card-body">
+                        <h3 class="fw-bold text-muted">{{ cat.name }}</h3>
+                        <p class="text-muted small">{{ cat.description }}</p>
+                        <div class="badge bg-success w-100">Ranking Guardado</div>
+                    </div>
                 </div>
+
+                <div class="card-footer bg-transparent border-0 pb-3" style="pointer-events: auto !important;">
+                    <a href="/ranking?category={{ cat.code }}"
+                       class="btn btn-primary btn-sm w-100 fw-bold shadow-sm">
+                        Reordenar / Editar
+                    </a>
+                </div>
+                {% else %}
+                <a href="/ranking?category={{ cat.code }}" class="text-decoration-none text-dark">
+                    {% if cat.image %}
+                    <img src="{{ cat.image }}" class="card-img-top" alt="{{ cat.name }}"
+                         style="height: 180px; object-fit: contain; padding: 10px;">
+                    {% else %}
+                    <img src="{% static 'images/categoria.png' %}" class="card-img-top"
+                         alt="Categoría" style="height: 180px; object-fit: contain; padding: 10px;">
+                    {% endif %}
+
+                    <div class="card-body">
+                        <h3 class="fw-bold">{{ cat.name }}</h3>
+                        <p class="text-muted small">{{ cat.description }}</p>
+                        <div class="badge bg-info text-dark">
+                            {{ cat.characters|length }} Personajes
+                        </div>
+                    </div>
+                </a>
+                {% endif %}
+
+                {% if user.is_authenticated and user.rol == 'admin' %}
+                <div class="card-footer bg-transparent border-0 pb-3">
+                    <hr>
+                    <div class="d-grid gap-2">
+                        <a href="{% url 'editar_categoria' cat.code %}" class="btn btn-sm btn-outline-dark">
+                            Editar Categoría
+                        </a>
+                        <form action="{% url 'borrar_categoria' cat.code %}" method="POST"
+                              onsubmit="return confirm('¿Seguro que quieres borrar la categoría {{ cat.name }}?');">
+                            {% csrf_token %}
+                            <button type="submit" class="btn btn-sm btn-outline-danger w-100">
+                                Borrar Categoría
+                            </button>
+                        </form>
+                    </div>
+                </div>
+                {% endif %}
             </div>
+        </div>
         {% empty %}
-            <div class="col-12 text-center">
-                <div class="alert alert-warning border-dark fw-bold">
-                    ¡Mosquis! No hay categorías en la base de datos de MongoDB.
-                </div>
+        <div class="col-12 text-center">
+            <div class="alert alert-warning border-dark fw-bold">
+                ¡Mosquis! No hay categorías en la base de datos de MongoDB.
             </div>
+        </div>
         {% endfor %}
     </div>
 </div>

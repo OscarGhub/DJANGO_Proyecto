@@ -7,53 +7,142 @@
 
 <div class="container mt-4">
 
-    <a href="/" class="btn-simpson d-inline-block mb-5">Volver</a>
+    <a href="/categorias" class="btn-simpson d-inline-block mb-5">Volver</a>
 
     <div id="tier-container">
         <div class="tier-row d-flex">
             <div class="tier-label s-tier">S</div>
-            <div class="tier-content sortable-list"></div>
+            <div class="tier-content sortable-list" data-tier="S">
+                {% if ranking_guardado %}
+                    {% for char_id in ranking_guardado.rankingList.S %}
+                        {% for c in characters %}
+                            {% if c.code|slugify == char_id|slugify %}
+                                <div class="tier-card" data-id="{{ c.code }}">
+                                    <img src="{% if 'http' in c.image %}{{ c.image }}{% else %}https://cdn.thesimpsonsapi.com/500{{ c.image }}{% endif %}" alt="{{ c.name }}" title="{{ c.name }}">
+                                </div>
+                            {% endif %}
+                        {% endfor %}
+                    {% endfor %}
+                {% endif %}
+            </div>
         </div>
+
         <div class="tier-row d-flex">
             <div class="tier-label a-tier">A</div>
-            <div class="tier-content sortable-list"></div>
+            <div class="tier-content sortable-list" data-tier="A">
+                {% if ranking_guardado %}
+                    {% for char_id in ranking_guardado.rankingList.A %}
+                        {% for c in characters %}
+                            {% if c.code|slugify == char_id|slugify %}
+                                <div class="tier-card" data-id="{{ c.code }}">
+                                    <img src="{% if 'http' in c.image %}{{ c.image }}{% else %}https://cdn.thesimpsonsapi.com/500{{ c.image }}{% endif %}" alt="{{ c.name }}" title="{{ c.name }}">
+                                </div>
+                            {% endif %}
+                        {% endfor %}
+                    {% endfor %}
+                {% endif %}
+            </div>
         </div>
+
         <div class="tier-row d-flex">
             <div class="tier-label b-tier">B</div>
-            <div class="tier-content sortable-list"></div>
+            <div class="tier-content sortable-list" data-tier="B">
+                {% if ranking_guardado %}
+                    {% for char_id in ranking_guardado.rankingList.B %}
+                        {% for c in characters %}
+                            {% if c.code|slugify == char_id|slugify %}
+                                <div class="tier-card" data-id="{{ c.code }}">
+                                    <img src="{% if 'http' in c.image %}{{ c.image }}{% else %}https://cdn.thesimpsonsapi.com/500{{ c.image }}{% endif %}" alt="{{ c.name }}" title="{{ c.name }}">
+                                </div>
+                            {% endif %}
+                        {% endfor %}
+                    {% endfor %}
+                {% endif %}
+            </div>
         </div>
+
         <div class="tier-row d-flex">
             <div class="tier-label c-tier">C</div>
-            <div class="tier-content sortable-list"></div>
+            <div class="tier-content sortable-list" data-tier="C">
+                {% if ranking_guardado %}
+                    {% for char_id in ranking_guardado.rankingList.C %}
+                        {% for c in characters %}
+                            {% if c.code|slugify == char_id|slugify %}
+                                <div class="tier-card" data-id="{{ c.code }}">
+                                    <img src="{% if 'http' in c.image %}{{ c.image }}{% else %}https://cdn.thesimpsonsapi.com/500{{ c.image }}{% endif %}" alt="{{ c.name }}" title="{{ c.name }}">
+                                </div>
+                            {% endif %}
+                        {% endfor %}
+                    {% endfor %}
+                {% endif %}
+            </div>
         </div>
+
         <div class="tier-row d-flex">
             <div class="tier-label d-tier">D</div>
-            <div class="tier-content sortable-list"></div>
+            <div class="tier-content sortable-list" data-tier="D">
+                {% if ranking_guardado %}
+                    {% for char_id in ranking_guardado.rankingList.D %}
+                        {% for c in characters %}
+                            {% if c.code|slugify == char_id|slugify %}
+                                <div class="tier-card" data-id="{{ c.code }}">
+                                    <img src="{% if 'http' in c.image %}{{ c.image }}{% else %}https://cdn.thesimpsonsapi.com/500{{ c.image }}{% endif %}" alt="{{ c.name }}" title="{{ c.name }}">
+                                </div>
+                            {% endif %}
+                        {% endfor %}
+                    {% endfor %}
+                {% endif %}
+            </div>
         </div>
+
         <div class="tier-row d-flex">
             <div class="tier-label e-tier">E</div>
-            <div class="tier-content sortable-list"></div>
+            <div class="tier-content sortable-list" data-tier="E">
+                {% if ranking_guardado %}
+                    {% for char_id in ranking_guardado.rankingList.E %}
+                        {% for c in characters %}
+                            {% if c.code|slugify == char_id|slugify %}
+                                <div class="tier-card" data-id="{{ c.code }}">
+                                    <img src="{% if 'http' in c.image %}{{ c.image }}{% else %}https://cdn.thesimpsonsapi.com/500{{ c.image }}{% endif %}" alt="{{ c.name }}" title="{{ c.name }}">
+                                </div>
+                            {% endif %}
+                        {% endfor %}
+                    {% endfor %}
+                {% endif %}
+            </div>
         </div>
+
         <div class="tier-row d-flex">
             <div class="tier-label f-tier">F</div>
-            <div class="tier-content sortable-list"></div>
+            <div class="tier-content sortable-list" data-tier="F">
+                {% if ranking_guardado %}
+                    {% for char_id in ranking_guardado.rankingList.F %}
+                        {% for c in characters %}
+                            {% if c.code|slugify == char_id|slugify %}
+                                <div class="tier-card" data-id="{{ c.code }}">
+                                    <img src="{% if 'http' in c.image %}{{ c.image }}{% else %}https://cdn.thesimpsonsapi.com/500{{ c.image }}{% endif %}" alt="{{ c.name }}" title="{{ c.name }}">
+                                </div>
+                            {% endif %}
+                        {% endfor %}
+                    {% endfor %}
+                {% endif %}
+            </div>
         </div>
     </div>
 
     <div class="mt-5 p-4 bg-dark rounded shadow">
         <h3 class="text-white mb-3">Personajes Disponibles</h3>
         <div id="character-pool" class="sortable-list d-flex flex-wrap gap-2">
-
             {% for c in characters %}
-                <div class="tier-card" data-id="{{ c.code }}">
-                    <img src="
-                            {% if 'http' in c.image %}{{ c.image }}{% else %}https://cdn.thesimpsonsapi.com/500{{ c.image }}{% endif %}"
-                         alt="{{ c.name }}"
-                         title="{{ c.name }}"
-                         style="width: 80px; height: 80px; object-fit: contain; padding: 5px;">
-                </div>
+                {% if c.code|slugify not in ids_ya_rankeados %}
+                    <div class="tier-card" data-id="{{ c.code }}">
+                        <img src="{% if 'http' in c.image %}{{ c.image }}{% else %}https://cdn.thesimpsonsapi.com/500{{ c.image }}{% endif %}"
+                             alt="{{ c.name }}"
+                             title="{{ c.name }}"
+                             style="width: 80px; height: 80px; object-fit: contain; padding: 5px;">
+                    </div>
+                {% endif %}
             {% endfor %}
-
         </div>
     </div>
 
@@ -63,7 +152,7 @@
         <input type="hidden" name="ranking_data" id="ranking-data">
 
         <div class="text-center mt-4 mb-5">
-            <button type="submit" class="btn-simpson">Guardar y Salir</button>
+            <button type="submit" class="btn-simpson">Guardar Cambios</button>
         </div>
     </form>
 
@@ -92,28 +181,13 @@
 
         const tierData = {};
         const rows = document.querySelectorAll('.tier-row');
-        let totalAsignados = 0;
 
         rows.forEach(row => {
             const tierLabel = row.querySelector('.tier-label').innerText.trim();
             const cards = row.querySelectorAll('.tier-card');
-            const ids = Array.from(cards).map(card => card.getAttribute('data-id'));
-
-            tierData[tierLabel] = ids;
-            totalAsignados += ids.length;
+            tierData[tierLabel] = Array.from(cards).map(card => card.getAttribute('data-id'));
         });
 
-        if (totalAsignados === 0) {
-            e.preventDefault();
-            alert("¡Ouch! El ranking está vacío.");
-            return;
-        }
-
-        const confirmacion = confirm("¿Estás seguro de que este es tu ranking definitivo?");
-        if (!confirmacion) {
-            e.preventDefault();
-        } else {
-            document.getElementById('ranking-data').value = JSON.stringify(tierData);
-        }
+        document.getElementById('ranking-data').value = JSON.stringify(tierData);
     });
 </script>

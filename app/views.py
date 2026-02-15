@@ -93,23 +93,29 @@ def logout_usuario(request):
 
 
 def ranking(request):
-    if not Character.objects.using('mongodb').exists():
-        sync_simpsons_characters()
-
     category_code = request.GET.get('category')
+    ranking_guardado = None
+    ids_ya_rankeados = []
 
     if category_code:
-        category = Category.objects.using('mongodb').filter(code=category_code).first()
-        if category:
-            characters = Character.objects.using('mongodb').filter(code__in=category.characters)
-        else:
-            characters = []
-    else:
-        characters = Character.objects.using('mongodb').all()
+        category = Category.objects.using('mongodb').filter(code=int(category_code)).first()
+        characters = Character.objects.using('mongodb').filter(code__in=category.characters)
+
+        if request.user.is_authenticated:
+            ranking_guardado = Ranking.objects.using('mongodb').filter(
+                user=request.user.email,
+                categoryCode=int(category_code)
+            ).first()
+
+            if ranking_guardado:
+                for tier, ids in ranking_guardado.rankingList.items():
+                    ids_ya_rankeados.extend([str(i) for i in ids])
 
     return render(request, 'ranking.html', {
         'characters': characters,
-        'category_code': category_code
+        'category_code': category_code,
+        'ranking_guardado': ranking_guardado,
+        'ids_ya_rankeados': ids_ya_rankeados
     })
 
 
